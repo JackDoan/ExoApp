@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">Exo Control</string>
+    <string name="action_scan">SCAN</string>
+    <string name="action_stop">STOP</string>
+    <string name="activity_device">Device</string>
+    <string name="action_settings">Settings</string>
+    <string name="enableButtonText">Enable</string>
+    <string name="auto_calibrate_button_text">Auto Calibrate</string>
+    <string name="reset_button_text">Reset</string>
+    <string name="stoSwitchLabel">Power</string>
+    <string name="NoPairMsg">You haven\'t paired with any exoskeletons. Go to settings and pair with one!</string>
+    <string name="NoBTMsg">Device does not support Bluetooth</string>
+    <string name="battLabel">Battery:</string>
+    <string name="control_mode">Control Mode:</string>
+    <string name="command_input">Command Input:</string>
+    <string name="send">Send</string>
+    <string name="_0_000">0.000</string>
+    <string name="drawer_open">Open</string>
+    <string name="drawer_close">Close</string>
+    <string name="dummy_text">Bottom Text</string>
+    <string name="connecting">Connecting...</string>
+</resources>

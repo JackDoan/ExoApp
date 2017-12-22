@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package com.github.douglasjunior.bluetoothsample;
+package edu.utdallas.locolab.exoapp.phone;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;

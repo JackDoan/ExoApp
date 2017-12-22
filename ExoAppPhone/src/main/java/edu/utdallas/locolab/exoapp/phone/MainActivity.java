@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package com.github.douglasjunior.bluetoothsample;
+package edu.utdallas.locolab.exoapp.phone;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -44,6 +44,7 @@ import android.widget.Toast;
 import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothDeviceDecorator;
 import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothService;
 import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothStatus;
+import com.github.douglasjunior.phone.R;
 
 import java.util.Arrays;
 
