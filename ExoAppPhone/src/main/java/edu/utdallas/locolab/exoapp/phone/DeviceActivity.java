@@ -35,10 +35,9 @@ import android.widget.EditText;
 import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothService;
 import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothStatus;
 import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothWriter;
-import com.github.douglasjunior.phone.R;
 
 /**
- * Created by douglas on 10/04/2017.
+ * Created by jad140230 on 12/22/2017
  */
 
 public class DeviceActivity extends AppCompatActivity implements BluetoothService.OnBluetoothEventCallback, View.OnClickListener {

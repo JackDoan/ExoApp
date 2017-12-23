@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package edu.utdallas.locolab.exoapp.phone;
+package deprecated;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -34,13 +34,14 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothService;
-import com.github.douglasjunior.phone.R;
 import com.wpx.util.WPXUtils;
+
+import edu.utdallas.locolab.exoapp.phone.R;
 
 /**
  * Created by douglas on 26/05/17.
  */
-
+@Deprecated
 public class BitmapActivity extends AppCompatActivity implements View.OnClickListener {
 
     private FloatingActionButton mFab;

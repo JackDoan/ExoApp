@@ -34,16 +34,13 @@ import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothService;
 import java.util.UUID;
 
 /**
- * Created by douglas on 29/05/17.
+ * Created by jad140230 on 12/22/2017
  */
-public class SampleApplication extends Application {
+public class ExoApplication extends Application {
 
-    /*
-     * Change for the UUID that you want.
-     */
     private static final UUID UUID_DEVICE = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
-    private static final UUID UUID_SERVICE = UUID.fromString("e7810a71-73ae-499d-8c15-faa9aef0c3f2");
-    private static final UUID UUID_CHARACTERISTIC = UUID.fromString("bef8d6c9-9c21-4c9e-b632-bd58c1009f9f");
+    //private static final UUID UUID_SERVICE = UUID.fromString("e7810a71-73ae-499d-8c15-faa9aef0c3f2");
+    //private static final UUID UUID_CHARACTERISTIC = UUID.fromString("bef8d6c9-9c21-4c9e-b632-bd58c1009f9f");
 
     @Override
     public void onCreate() {
@@ -54,17 +51,16 @@ public class SampleApplication extends Application {
         config.bluetoothServiceClass = BluetoothClassicService.class; //  BluetoothClassicService.class or BluetoothLeService.class
 
         config.context = getApplicationContext();
-        config.bufferSize = 1024;
+        config.bufferSize = 10240;
         config.characterDelimiter = '\n';
-        config.deviceName = "Bluetooth Sample";
+        config.deviceName = "ExoApp";
         config.callListenersInMainThread = true;
 
         //config.uuid = null; // When using BluetoothLeService.class set null to show all devices on scan.
         config.uuid = UUID_DEVICE; // For Classic
-
-        config.uuidService = UUID_SERVICE; // For BLE
-        config.uuidCharacteristic = UUID_CHARACTERISTIC; // For BLE
-        config.transport = BluetoothDevice.TRANSPORT_LE; // Only for dual-mode devices
+        //config.uuidService = UUID_SERVICE; // For BLE
+        //config.uuidCharacteristic = UUID_CHARACTERISTIC; // For BLE
+        //config.transport = BluetoothDevice.TRANSPORT_LE; // Only for dual-mode devices
 
         BluetoothService.init(config);
     }

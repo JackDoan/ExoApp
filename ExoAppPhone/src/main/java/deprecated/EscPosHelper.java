@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package edu.utdallas.locolab.exoapp.phone;
+package deprecated;
 
 import android.graphics.Bitmap;
 
@@ -32,6 +32,7 @@ import java.io.IOException;
 /**
  * Code adapted from http://new-grumpy-mentat.blogspot.com.br/2014/06/java-escpos-image-printing.html
  */
+@Deprecated
 public final class EscPosHelper {
 
     private EscPosHelper() {
@@ -48,6 +49,7 @@ public final class EscPosHelper {
      *
      * @param image 2D Array of RGB colors (Row major order)
      */
+    @Deprecated
     public static byte[] printImage(Bitmap image) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -73,6 +75,7 @@ public final class EscPosHelper {
      * @param color RGB color.
      * @return true if should be printed/burned (black), false otherwise (white).
      */
+    @Deprecated
     private static boolean shouldPrintColor(int color) {
         final int threshold = 127;
         int a, r, g, b, luminance;
@@ -97,6 +100,7 @@ public final class EscPosHelper {
      * @param image 2D array of pixels of the image (RGB, row major order).
      * @return 3 byte array with 24 dots (field set).
      */
+    @Deprecated
     private static byte[] collectSlice(int y, int x, Bitmap image) {
         byte[] slices = new byte[]{0, 0, 0};
         for (int yy = y, i = 0; yy < y + 24 && i < 3; yy += 8, i++) {// va a hacer 3 ciclos

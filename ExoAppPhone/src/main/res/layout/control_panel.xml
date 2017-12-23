@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="edu.utdallas.locolab.comex2.MainActivity"
+    tools:context="edu.utdallas.locolab.exoapp.phone.ExoControlActivity"
     >
 
 

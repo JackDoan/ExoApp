@@ -25,9 +25,11 @@
                 android:id="@+id/pg_bar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:indeterminate="true"
 
-                android:layout_gravity="right" />
+                android:layout_gravity="right"
+                android:indeterminate="true"
+                android:indeterminateTint="@color/cardview_light_background"
+                android:progressTint="@color/cardview_light_background" />
 
         </android.support.v7.widget.Toolbar>
 

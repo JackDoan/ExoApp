@@ -41,16 +41,18 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothDeviceDecorator;
 import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothService;
 import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothStatus;
-import com.github.douglasjunior.phone.R;
+
 
 import java.util.Arrays;
 
+import deprecated.BitmapActivity;
+import edu.utdallas.locolab.exoapp.bluetooth.BluetoothExoDecorator;
+
 public class MainActivity extends AppCompatActivity implements BluetoothService.OnBluetoothScanCallback, BluetoothService.OnBluetoothEventCallback, DeviceItemAdapter.OnAdapterItemClickListener {
 
-    public static final String TAG = "BluetoothExample";
+    public static final String TAG = "ExoApp";
 
     private ProgressBar pgBar;
     private Menu mMenu;
@@ -77,7 +79,8 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
         LinearLayoutManager lm = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(lm);
 
-        mAdapter = new DeviceItemAdapter(this, mBluetoothAdapter.getBondedDevices());
+        //mAdapter = new DeviceItemAdapter(this, mBluetoothAdapter.getBondedDevices());
+        mAdapter = new DeviceItemAdapter(this); //use the above to display paired devices
         mAdapter.setOnAdapterItemClickListener(this);
         mRecyclerView.setAdapter(mAdapter);
 
@@ -123,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
     @Override
     public void onDeviceDiscovered(BluetoothDevice device, int rssi) {
         Log.d(TAG, "onDeviceDiscovered: " + device.getName() + " - " + device.getAddress() + " - " + Arrays.toString(device.getUuids()));
-        BluetoothDeviceDecorator dv = new BluetoothDeviceDecorator(device, rssi);
+        BluetoothExoDecorator dv = new BluetoothExoDecorator(device, rssi);
         int index = mAdapter.getDevices().indexOf(dv);
         if (index < 0) {
             mAdapter.getDevices().add(dv);
@@ -162,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
         Toast.makeText(this, status.toString(), Toast.LENGTH_SHORT).show();
 
         if (status == BluetoothStatus.CONNECTED) {
-            CharSequence colors[] = new CharSequence[]{"Try text", "Try picture"};
+            CharSequence colors[] = new CharSequence[]{"Console", "Control Panel"};
 
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Select");
@@ -172,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
                     if (which == 0) {
                         startActivity(new Intent(MainActivity.this, DeviceActivity.class));
                     } else {
-                        startActivity(new Intent(MainActivity.this, BitmapActivity.class));
+                        startActivity(new Intent(MainActivity.this, ExoControlActivity.class));
                     }
                 }
             });
@@ -198,7 +201,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
     }
 
     @Override
-    public void onItemClick(BluetoothDeviceDecorator device, int position) {
+    public void onItemClick(BluetoothExoDecorator device, int position) {
         mService.connect(device.getDevice());
     }
 }

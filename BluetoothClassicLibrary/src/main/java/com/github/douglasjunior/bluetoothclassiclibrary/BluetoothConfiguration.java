@@ -112,7 +112,7 @@ public class BluetoothConfiguration {
             transport = BluetoothDevice.TRANSPORT_LE;
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             // From Android LOLLIPOP (21) the transport types exists, but them are hide for use,
-            // so is needed to use relfection to get the value
+            // so is needed to use reflection to get the value
             try {
                 transport = BluetoothDevice.class.getDeclaredField("TRANSPORT_LE").getInt(null);
             } catch (Exception ex) {

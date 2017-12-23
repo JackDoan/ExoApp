@@ -31,27 +31,37 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothDeviceDecorator;
-import com.github.douglasjunior.phone.R;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import edu.utdallas.locolab.exoapp.bluetooth.BluetoothExoDecorator;
+
 /**
- * Created by douglas on 10/04/2017.
+ * Created by douglas on 10/04/2017
+ *
+ * This class generates the little cards in MainActivity for each bluetooth device
+ *
  */
 
 public class DeviceItemAdapter extends RecyclerView.Adapter<DeviceItemAdapter.ViewHolder> {
 
     private final Context mContext;
-    private final List<BluetoothDeviceDecorator> mDevices;
+    private final List<BluetoothExoDecorator> mDevices;
     private final LayoutInflater mInflater;
     private OnAdapterItemClickListener mOnItemClickListener;
 
+
+    public DeviceItemAdapter(Context context) {
+        super();
+        mContext = context;
+        mDevices = new ArrayList<>();
+        mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    }
 
     public DeviceItemAdapter(Context context, List<BluetoothDevice> devices) {
         super();
@@ -60,10 +70,10 @@ public class DeviceItemAdapter extends RecyclerView.Adapter<DeviceItemAdapter.Vi
         mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
-    public static List<BluetoothDeviceDecorator> decorateDevices(Collection<BluetoothDevice> btDevices) {
-        List<BluetoothDeviceDecorator> devices = new ArrayList<>();
+    public static List<BluetoothExoDecorator> decorateDevices(Collection<BluetoothDevice> btDevices) {
+        List<BluetoothExoDecorator> devices = new ArrayList<>();
         for (BluetoothDevice dev : btDevices) {
-            devices.add(new BluetoothDeviceDecorator(dev, 0));
+            devices.add(new BluetoothExoDecorator(dev, 0));
         }
         return devices;
     }
@@ -80,11 +90,17 @@ public class DeviceItemAdapter extends RecyclerView.Adapter<DeviceItemAdapter.Vi
 
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
-        final BluetoothDeviceDecorator device = mDevices.get(position);
+        final BluetoothExoDecorator device = mDevices.get(position);
 
         holder.tvName.setText(TextUtils.isEmpty(device.getName()) ? "---" : device.getName());
         holder.tvAddress.setText(device.getAddress());
         holder.tvRSSI.setText(device.getRSSI() + "");
+        if(device.isExo()) {
+            holder.ivIsExo.setVisibility(View.VISIBLE);
+        }
+        else {
+            holder.ivIsExo.setVisibility(View.INVISIBLE);
+        }
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,7 +115,7 @@ public class DeviceItemAdapter extends RecyclerView.Adapter<DeviceItemAdapter.Vi
         return mDevices.size();
     }
 
-    public List<BluetoothDeviceDecorator> getDevices() {
+    public List<BluetoothExoDecorator> getDevices() {
         return mDevices;
     }
 
@@ -108,7 +124,7 @@ public class DeviceItemAdapter extends RecyclerView.Adapter<DeviceItemAdapter.Vi
     }
 
     public interface OnAdapterItemClickListener {
-        public void onItemClick(BluetoothDeviceDecorator device, int position);
+        public void onItemClick(BluetoothExoDecorator device, int position);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -116,12 +132,13 @@ public class DeviceItemAdapter extends RecyclerView.Adapter<DeviceItemAdapter.Vi
         private final TextView tvName;
         private final TextView tvAddress;
         private final TextView tvRSSI;
-
+        private ImageView ivIsExo;
         public ViewHolder(View itemView) {
             super(itemView);
             tvName = (TextView) itemView.findViewById(R.id.tv_name);
             tvAddress = (TextView) itemView.findViewById(R.id.tv_address);
             tvRSSI = (TextView) itemView.findViewById(R.id.tv_rssi);
+            ivIsExo = (ImageView) itemView.findViewById(R.id.is_exo);
         }
     }
 }

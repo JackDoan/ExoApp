@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package edu.utdallas.locolab.exoapp.phone;
+package deprecated;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -33,6 +33,7 @@ import android.graphics.Paint;
 /**
  * Created by douglas on 30/05/17.
  */
+@Deprecated
 public final class BitmapHelper {
 
     private BitmapHelper(){}
