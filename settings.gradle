@@ -1,1 +1,1 @@
-include ':BluetoothLowEnergyLibrary', ':BluetoothClassicLibrary', ':ExoAppPhone'
+include ':BluetoothClassicLibrary', ':ExoAppPhone'

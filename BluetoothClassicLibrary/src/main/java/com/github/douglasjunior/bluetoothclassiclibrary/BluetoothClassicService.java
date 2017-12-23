@@ -64,15 +64,43 @@ public class BluetoothClassicService extends BluetoothService {
 
     // Member fields
     private final BluetoothAdapter mAdapter;
+    // The BroadcastReceiver that listens for discovered devices and
+    // changes the title when discovery is finished
+    private final BroadcastReceiver mScanReceiver = new BroadcastReceiver() {
+        @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.BLUETOOTH})
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+
+            // When discovery finds a device
+            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                // Get the BluetoothDevice object from the Intent
+                final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                // If it's already paired, skip it, because it's been listed
+                // already
+                final int RSSI = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE);
+
+                if (onScanCallback != null)
+                    runOnMainThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            onScanCallback.onDeviceDiscovered(device, RSSI);
+                        }
+                    });
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                stopScan();
+            }
+        }
+    };
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
+
 
     protected BluetoothClassicService(BluetoothConfiguration config) {
         super(config);
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mStatus = BluetoothStatus.NONE;
     }
-
 
     /**
      * Start the ConnectThread to initiate a connection to a remote device.
@@ -206,6 +234,54 @@ public class BluetoothClassicService extends BluetoothService {
             });
     }
 
+    @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.BLUETOOTH})
+    @Override
+    public void startScan() {
+        if (onScanCallback != null)
+            runOnMainThread(new Runnable() {
+                @Override
+                public void run() {
+                    onScanCallback.onStartScan();
+                }
+            });
+
+        // Register for broadcasts when a device is discovered
+        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        mConfig.context.registerReceiver(mScanReceiver, filter);
+
+        // Register for broadcasts when discovery has finished
+        filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        mConfig.context.registerReceiver(mScanReceiver, filter);
+
+        if (mAdapter.isDiscovering()) {
+            mAdapter.cancelDiscovery();
+        }
+
+        mAdapter.startDiscovery();
+    }
+
+    @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.BLUETOOTH})
+    @Override
+    public void stopScan() {
+        try {
+            mConfig.context.unregisterReceiver(mScanReceiver);
+        } catch (IllegalArgumentException ex) {
+            ex.printStackTrace();
+        }
+
+        if (mAdapter.isDiscovering()) {
+            mAdapter.cancelDiscovery();
+        }
+
+        if (onScanCallback != null)
+            runOnMainThread(new Runnable() {
+                @Override
+                public void run() {
+                    onScanCallback.onStopScan();
+                }
+            });
+    }
+
     /**
      * This thread runs while attempting to make an outgoing connection with a device. It runs straight through; the
      * connection either succeeds or fails.
@@ -331,9 +407,7 @@ public class BluetoothClassicService extends BluetoothService {
                             dispatchBuffer(buffer, i);
                             i = 0;
                         }
-                        continue;
-                    }
-                    if (i == buffer.length - 1) {
+                    } else if (i == buffer.length - 1) {
                         dispatchBuffer(buffer, i);
                         i = 0;
                     }
@@ -402,83 +476,6 @@ public class BluetoothClassicService extends BluetoothService {
                 Log.e(TAG, "interrupt() of Thread failed", e);
             }
         }
-    }
-
-    // The BroadcastReceiver that listens for discovered devices and
-    // changes the title when discovery is finished
-    private final BroadcastReceiver mScanReceiver = new BroadcastReceiver() {
-        @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.BLUETOOTH})
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-
-            // When discovery finds a device
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                // Get the BluetoothDevice object from the Intent
-                final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                // If it's already paired, skip it, because it's been listed
-                // already
-                final int RSSI = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE);
-
-                if (onScanCallback != null)
-                    runOnMainThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            onScanCallback.onDeviceDiscovered(device, RSSI);
-                        }
-                    });
-            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                stopScan();
-            }
-        }
-    };
-
-    @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.BLUETOOTH})
-    @Override
-    public void startScan() {
-        if (onScanCallback != null)
-            runOnMainThread(new Runnable() {
-                @Override
-                public void run() {
-                    onScanCallback.onStartScan();
-                }
-            });
-
-        // Register for broadcasts when a device is discovered
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        mConfig.context.registerReceiver(mScanReceiver, filter);
-
-        // Register for broadcasts when discovery has finished
-        filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-        mConfig.context.registerReceiver(mScanReceiver, filter);
-
-        if (mAdapter.isDiscovering()) {
-            mAdapter.cancelDiscovery();
-        }
-
-        mAdapter.startDiscovery();
-    }
-
-    @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.BLUETOOTH})
-    @Override
-    public void stopScan() {
-        try {
-            mConfig.context.unregisterReceiver(mScanReceiver);
-        } catch (IllegalArgumentException ex) {
-            ex.printStackTrace();
-        }
-
-        if (mAdapter.isDiscovering()) {
-            mAdapter.cancelDiscovery();
-        }
-
-        if (onScanCallback != null)
-            runOnMainThread(new Runnable() {
-                @Override
-                public void run() {
-                    onScanCallback.onStopScan();
-                }
-            });
     }
 
 }

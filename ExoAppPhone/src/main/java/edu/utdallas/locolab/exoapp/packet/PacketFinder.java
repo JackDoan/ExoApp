@@ -14,9 +14,9 @@ import java.util.LinkedList;
  */
 
 public class PacketFinder {
+    boolean saveData;
     private byte[] byteHolder;
     private LinkedList<DataPacket> stack;
-    boolean saveData;
 
     public PacketFinder() {
         //byteHolder = new byte[DataPacket.packetLen];
@@ -54,7 +54,7 @@ public class PacketFinder {
                 buffer = Arrays.copyOfRange(buffer, head, buffer.length-1);
                 if(buffer.length > DataPacket.packetLen) { //use > instead of >= to have fewer cases
                     //there should be an entire packet here!
-                    byte[] pkt = Arrays.copyOfRange(buffer, 1, DataPacket.packetLen-1);
+                    byte[] pkt = Arrays.copyOfRange(buffer, 0, DataPacket.packetLen - 1); //changed 1 to 0 bc delimiter
                     Log.d("PacketFinder", "Found: " + BluetoothWriter.bytesToHex(pkt));
                     stack.add(new DataPacket(pkt)); //from 1 for framing reasons
                     buffer = Arrays.copyOfRange(buffer, DataPacket.packetLen-1, buffer.length-1); //keep the 0x42 in there
@@ -88,9 +88,14 @@ public class PacketFinder {
         int i = 0;
         int toReturn = -1;
         while(i < buffer.length-1) {
-            if(
+            /*if(
                     buffer[i] == DataPacket.endOfPacket &&
                     buffer[i+1] == DataPacket.startOfPacket) {
+                toReturn = i;
+                break;
+            }*/
+            if (
+                    buffer[i] == DataPacket.startOfPacket) {
                 toReturn = i;
                 break;
             }
