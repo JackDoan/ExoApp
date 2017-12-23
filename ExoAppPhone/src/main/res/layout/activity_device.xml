@@ -27,7 +27,7 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:layout_weight="1">
 
         <LinearLayout
@@ -39,37 +39,37 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Log data:" />
+                android:text="@string/log_data" />
 
             <EditText
                 android:id="@+id/ed_read"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:gravity="top"
                 android:background="#fff"
                 android:focusable="false"
+                android:gravity="top"
                 android:inputType="none" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Write:" />
+                android:text="@string/write" />
 
             <EditText
                 android:id="@+id/ed_write"
                 android:layout_width="match_parent"
-                android:background="#b3b3b3"
-                android:minHeight="48dp"
                 android:layout_height="wrap_content"
-                android:inputType="textMultiLine" />
+                android:background="#b3b3b3"
+                android:inputType="textMultiLine"
+                android:minHeight="48dp" />
         </LinearLayout>
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|right"
+            android:layout_gravity="bottom|end"
             android:src="@android:drawable/ic_menu_send"
             app:useCompatPadding="true" />
     </FrameLayout>

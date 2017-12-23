@@ -178,7 +178,7 @@ public class DataPacket {
 
     @Override
     public String toString() {
-        String sb = String.valueOf(jointCounts) +
+        return String.valueOf(jointCounts) +
                 ',' +
                 torqueCommand +
                 ',' +
@@ -210,7 +210,6 @@ public class DataPacket {
                 ',' +
                 current +
                 '\n';
-        return sb;
     }
 
 }

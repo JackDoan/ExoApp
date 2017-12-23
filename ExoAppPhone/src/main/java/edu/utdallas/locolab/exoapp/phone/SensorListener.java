@@ -53,11 +53,11 @@ public class SensorListener implements SensorEventListener {
                 float orientation[] = new float[3];
                 float radToDeg = 180.0f / 3.14159f;
                 SensorManager.getOrientation(R, orientation);
-                sensorText.setText(
+                /*sensorText.setText(
                         Float.toString(orientation[0] * radToDeg).split("\\.")[0]
                                 + " " + Float.toString(orientation[1] * radToDeg).split("\\.")[0]
                                 + " " + Float.toString(orientation[2] * radToDeg).split("\\.")[0]
-                );
+                );*/
                 if (enabled) {
                     comex2.setPositionDeg(24.0f * orientation[1] * radToDeg);
                 }

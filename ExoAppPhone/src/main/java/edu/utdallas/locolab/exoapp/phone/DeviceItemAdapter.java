@@ -37,6 +37,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import edu.utdallas.locolab.exoapp.bluetooth.BluetoothExoDecorator;
@@ -70,6 +71,10 @@ public class DeviceItemAdapter extends RecyclerView.Adapter<DeviceItemAdapter.Vi
         mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
+    public DeviceItemAdapter(Context context, Set<BluetoothDevice> devices) {
+        this(context, new ArrayList<>(devices));
+    }
+
     public static List<BluetoothExoDecorator> decorateDevices(Collection<BluetoothDevice> btDevices) {
         List<BluetoothExoDecorator> devices = new ArrayList<>();
         for (BluetoothDevice dev : btDevices) {
@@ -78,14 +83,9 @@ public class DeviceItemAdapter extends RecyclerView.Adapter<DeviceItemAdapter.Vi
         return devices;
     }
 
-    public DeviceItemAdapter(Context context, Set<BluetoothDevice> devices) {
-        this(context, new ArrayList<>(devices));
-    }
-
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        ViewHolder vh = new ViewHolder(mInflater.inflate(R.layout.device_item, parent, false));
-        return vh;
+        return new ViewHolder(mInflater.inflate(R.layout.device_item, parent, false));
     }
 
     @Override
@@ -94,7 +94,7 @@ public class DeviceItemAdapter extends RecyclerView.Adapter<DeviceItemAdapter.Vi
 
         holder.tvName.setText(TextUtils.isEmpty(device.getName()) ? "---" : device.getName());
         holder.tvAddress.setText(device.getAddress());
-        holder.tvRSSI.setText(device.getRSSI() + "");
+        holder.tvRSSI.setText(String.format(Locale.US, "%d", device.getRSSI()));
         if(device.isExo()) {
             holder.ivIsExo.setVisibility(View.VISIBLE);
         }
@@ -102,12 +102,7 @@ public class DeviceItemAdapter extends RecyclerView.Adapter<DeviceItemAdapter.Vi
             holder.ivIsExo.setVisibility(View.INVISIBLE);
         }
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mOnItemClickListener.onItemClick(device, position);
-            }
-        });
+        holder.itemView.setOnClickListener(v -> mOnItemClickListener.onItemClick(device, position));
     }
 
     @Override
@@ -124,7 +119,7 @@ public class DeviceItemAdapter extends RecyclerView.Adapter<DeviceItemAdapter.Vi
     }
 
     public interface OnAdapterItemClickListener {
-        public void onItemClick(BluetoothExoDecorator device, int position);
+        void onItemClick(BluetoothExoDecorator device, int position);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -135,10 +130,10 @@ public class DeviceItemAdapter extends RecyclerView.Adapter<DeviceItemAdapter.Vi
         private ImageView ivIsExo;
         public ViewHolder(View itemView) {
             super(itemView);
-            tvName = (TextView) itemView.findViewById(R.id.tv_name);
-            tvAddress = (TextView) itemView.findViewById(R.id.tv_address);
-            tvRSSI = (TextView) itemView.findViewById(R.id.tv_rssi);
-            ivIsExo = (ImageView) itemView.findViewById(R.id.is_exo);
+            tvName = itemView.findViewById(R.id.tv_name);
+            tvAddress = itemView.findViewById(R.id.tv_address);
+            tvRSSI = itemView.findViewById(R.id.tv_rssi);
+            ivIsExo = itemView.findViewById(R.id.is_exo);
         }
     }
 }

@@ -4,8 +4,8 @@ android {
     compileSdkVersion 27
     buildToolsVersion '27.0.3'
     defaultConfig {
-        minSdkVersion 7
-        targetSdkVersion 7
+        minSdkVersion 14
+        targetSdkVersion 14
         versionCode 11
         versionName "0.3.4"
     }
@@ -17,8 +17,7 @@ android {
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
+        targetCompatibility JavaVersion.VERSION_1_8    }
     productFlavors {
     }
 }

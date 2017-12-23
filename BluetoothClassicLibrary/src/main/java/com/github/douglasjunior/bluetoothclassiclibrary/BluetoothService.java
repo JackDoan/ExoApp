@@ -35,26 +35,63 @@ import java.lang.reflect.InvocationTargetException;
  * Created by douglas on 23/03/15.
  */
 public abstract class BluetoothService {
+    protected static final boolean D = true;
     // Debugging
     private static final String TAG = BluetoothService.class.getSimpleName();
-    protected static final boolean D = true;
-
     protected static BluetoothService mDefaultServiceInstance;
+    private static BluetoothConfiguration mDefaultConfiguration;
+    private final Handler handler;
     protected BluetoothConfiguration mConfig;
     protected BluetoothStatus mStatus;
-
-    private final Handler handler;
-
     protected OnBluetoothEventCallback onEventCallback;
-
     protected OnBluetoothScanCallback onScanCallback;
-
-    private static BluetoothConfiguration mDefaultConfiguration;
 
     protected BluetoothService(BluetoothConfiguration config) {
         this.mConfig = config;
         this.mStatus = BluetoothStatus.NONE;
         this.handler = new Handler();
+    }
+
+    /**
+     * Use {@link BluetoothService#init(BluetoothConfiguration)} instead.
+     */
+    @Deprecated
+    public static void setDefaultConfiguration(BluetoothConfiguration config) {
+        init(config);
+    }
+
+    /**
+     * Configures and initialize the BluetoothService singleton instance.
+     */
+    public static void init(BluetoothConfiguration config) {
+        mDefaultConfiguration = config;
+        if (mDefaultServiceInstance != null) {
+            mDefaultServiceInstance.stopService();
+            mDefaultServiceInstance = null;
+        }
+        try {
+            Constructor<? extends BluetoothService> constructor =
+                    (Constructor<? extends BluetoothService>) mDefaultConfiguration.bluetoothServiceClass.getDeclaredConstructors()[0];
+            constructor.setAccessible(true);
+            //BluetoothService bluetoothService
+            mDefaultServiceInstance = constructor.newInstance(mDefaultConfiguration);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Get the BluetoothService singleton instance.
+     */
+    public synchronized static BluetoothService getDefaultInstance() {
+        if (mDefaultServiceInstance == null) {
+            throw new IllegalStateException("BluetoothService is not initialized. Call BluetoothService.init(config).");
+        }
+        return mDefaultServiceInstance;
     }
 
     public void setOnEventCallback(OnBluetoothEventCallback onEventCallback) {
@@ -75,12 +112,7 @@ public abstract class BluetoothService {
 
         // Give the new state to the Handler so the UI Activity can update
         if (onEventCallback != null)
-            runOnMainThread(new Runnable() {
-                @Override
-                public void run() {
-                    onEventCallback.onStatusChange(status);
-                }
-            });
+            runOnMainThread(() -> onEventCallback.onStatusChange(status));
     }
 
     protected void runOnMainThread(final Runnable runnable, final long delayMillis) {
@@ -143,6 +175,10 @@ public abstract class BluetoothService {
      */
     public abstract void connect(BluetoothDevice device);
 
+    /* ====================================
+                STATICS METHODS
+     ====================================== */
+
     /**
      * Try to disconnect to the device and call the {@link OnBluetoothEventCallback}
      */
@@ -157,58 +193,6 @@ public abstract class BluetoothService {
      * Stops the BluetoothService and turn it unusable.
      */
     public abstract void stopService();
-
-    /* ====================================
-                STATICS METHODS
-     ====================================== */
-
-    /**
-     * Use {@link BluetoothService#init(BluetoothConfiguration)} instead.
-     *
-     * @param config
-     */
-    @Deprecated
-    public static void setDefaultConfiguration(BluetoothConfiguration config) {
-        init(config);
-    }
-
-    /**
-     * Configures and initialize the BluetoothService singleton instance.
-     *
-     * @param config
-     */
-    public static void init(BluetoothConfiguration config) {
-        mDefaultConfiguration = config;
-        if (mDefaultServiceInstance != null) {
-            mDefaultServiceInstance.stopService();
-            mDefaultServiceInstance = null;
-        }
-        try {
-            Constructor<? extends BluetoothService> constructor =
-                    (Constructor<? extends BluetoothService>) mDefaultConfiguration.bluetoothServiceClass.getDeclaredConstructors()[0];
-            constructor.setAccessible(true);
-            BluetoothService bluetoothService = constructor.newInstance(mDefaultConfiguration);
-            mDefaultServiceInstance = bluetoothService;
-        } catch (InvocationTargetException e) {
-            throw new RuntimeException(e);
-        } catch (InstantiationException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Get the BluetoothService singleton instance.
-     *
-     * @return
-     */
-    public synchronized static BluetoothService getDefaultInstance() {
-        if (mDefaultServiceInstance == null) {
-            throw new IllegalStateException("BluetoothService is not initialized. Call BluetoothService.init(config).");
-        }
-        return mDefaultServiceInstance;
-    }
 
     /* ====================================
                     CALLBACKS
