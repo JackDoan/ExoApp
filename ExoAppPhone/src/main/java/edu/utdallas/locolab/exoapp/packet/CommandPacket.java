@@ -28,8 +28,6 @@ public class CommandPacket {
     private static final byte GET_MAX_COUNTS = 0x05;
 
     private static final byte START_BYTE = 0x69;
-    public CommandPacket() {
-    }
 
     @org.jetbrains.annotations.Contract(pure = true)
     private static byte[]buildPacket(byte type) {

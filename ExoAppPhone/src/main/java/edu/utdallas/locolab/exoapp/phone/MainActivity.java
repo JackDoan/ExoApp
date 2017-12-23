@@ -47,7 +47,6 @@ import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothStatus;
 
 import java.util.Arrays;
 
-import deprecated.BitmapActivity;
 import edu.utdallas.locolab.exoapp.bluetooth.BluetoothExoDecorator;
 
 public class MainActivity extends AppCompatActivity implements BluetoothService.OnBluetoothScanCallback, BluetoothService.OnBluetoothEventCallback, DeviceItemAdapter.OnAdapterItemClickListener {
@@ -69,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        setTitle("Select an Actuator:");
         pgBar = (ProgressBar) findViewById(R.id.pg_bar);
         pgBar.setVisibility(View.GONE);
 
@@ -88,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
 
         mService.setOnScanCallback(this);
         mService.setOnEventCallback(this);
+        startStopScan();
     }
 
     @Override
@@ -165,8 +165,8 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
         Toast.makeText(this, status.toString(), Toast.LENGTH_SHORT).show();
 
         if (status == BluetoothStatus.CONNECTED) {
-            CharSequence colors[] = new CharSequence[]{"Console", "Control Panel"};
-
+            startActivity(new Intent(MainActivity.this, ExoControlActivity.class));
+            /*CharSequence colors[] = new CharSequence[]{"Console", "Control Panel"};
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Select");
             builder.setItems(colors, new DialogInterface.OnClickListener() {
@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
                 }
             });
             builder.setCancelable(false);
-            builder.show();
+            builder.show();*/
         }
 
     }

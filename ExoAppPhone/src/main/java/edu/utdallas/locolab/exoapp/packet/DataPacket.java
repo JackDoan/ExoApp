@@ -7,6 +7,7 @@ package edu.utdallas.locolab.exoapp.packet;
 public class DataPacket {
     public static final int packetLen = 45;
     public static final int startOfPacket = 0x69;
+    public static final int endOfPacket = 0x42;
     private final int voltageMax = 1530;//1680;
     private final int voltageMin = 1150;
     private final int JOINT_INDEX = 1;
