@@ -102,36 +102,23 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         cmdArg = findViewById(R.id.cmdArg);
         battBar = findViewById(R.id.battBar);
 
-        stoSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                mWriter.write(buildSTOPacket(b));
-            }
-        });
-        enableSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                mWriter.write(buildEnablePacket(b));
-            }
-        });
+        stoSwitch.setOnCheckedChangeListener((compoundButton, b) -> mWriter.write(buildSTOPacket(b)));
+        enableSwitch.setOnCheckedChangeListener((compoundButton, b) -> mWriter.write(buildEnablePacket(b)));
 
-        autoCal.setOnClickListener(new Button.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClickAutoCal(v);
-            }
+        autoCal.setOnClickListener(v -> {
+            mWriter.write(buildResetEncoderPacket());
+            mWriter.write(buildSDOPacket(0x6083, accel)); //accel
+            mWriter.write(buildSDOPacket(0x6084, accel)); //decel
+            comex2.setTorqueRamp(8000);
+            comex2.setThreshold(3050);
+            Toast.makeText(this, "Calibrated!", Toast.LENGTH_LONG).show();
         });
-        reset.setOnClickListener(new Button.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClickReset(v);
-            }
+        reset.setOnClickListener(v -> {
+            mWriter.write(buildResetEncoderPacket());
+            Toast.makeText(this, "Gait Reset!", Toast.LENGTH_LONG).show();
         });
-        sendButton.setOnClickListener(new Button.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClickSendCmd(v);
-            }
+        sendButton.setOnClickListener(v -> {
+            cmdSpinnerHandler.sentClicked(); /*todo check for nulls*/
         });
         cmdSpinnerHandler = new CMDSpinnerHandler(this,
                 (Spinner) findViewById(R.id.cmdSpinner),
@@ -226,35 +213,4 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         Log.d(TAG, "onDataWrite");
 //        mEdRead.append("> " + new String(buffer));
     }
-
-    public void handleMessage(byte[] inputMessage) {
-        //Log.d("EXO_DATA_HANDLER", "Message Handled.");
-            DataPacket dataNew = new DataPacket(inputMessage);
-            //Log.d("MsgHandler", "Packet found:  " + bytesToHex((byte[]) inputMessage.obj));
-            int diff = data.getTimestamp() - dataNew.getTimestamp();
-            battBar.setProgress((int) data.getVoltagePercent());
-            data = dataNew;
-
-    }
-
-    private void onClickAutoCal(View v) {
-        mWriter.write(buildResetEncoderPacket());
-        mWriter.write(buildSDOPacket(0x6083, accel)); //accel
-        mWriter.write(buildSDOPacket(0x6084, accel)); //decel
-        comex2.setTorqueRamp(8000);
-        comex2.setThreshold(3050);
-        Toast.makeText(this, "Calibrated!", Toast.LENGTH_LONG).show();
-    }
-
-    private void onClickReset(View v) {
-        mWriter.write(buildResetEncoderPacket());
-        Toast.makeText(this, "Gait Reset!", Toast.LENGTH_LONG).show();
-    }
-
-    public void onClickSendCmd(View v) {
-        cmdSpinnerHandler.sentClicked(); /*todo check for nulls*/
-    }
-
-
-
 }

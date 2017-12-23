@@ -52,7 +52,7 @@ public class ExoApplication extends Application {
 
         config.context = getApplicationContext();
         config.bufferSize = 10240;
-        config.characterDelimiter = '\n';
+        config.characterDelimiter = 0x42;
         config.deviceName = "ExoApp";
         config.callListenersInMainThread = true;
 

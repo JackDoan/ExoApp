@@ -16,10 +16,16 @@ import java.util.LinkedList;
 public class PacketFinder {
     private byte[] byteHolder;
     private LinkedList<DataPacket> stack;
+    boolean saveData;
 
     public PacketFinder() {
         //byteHolder = new byte[DataPacket.packetLen];
         stack = new LinkedList<>();
+        saveData = false;
+    }
+
+    public void setSaveData(boolean b) {
+        saveData = b;
     }
 
     public byte[] concat(byte[] a, byte[] b) {
@@ -41,7 +47,7 @@ public class PacketFinder {
             else { //no buffer to splice, find and /maybe/ add a packet?
                 int head = findHeader(buffer);
                 if(head < 0) {
-                    Log.d("PacketFinder", "Rejected: " + BluetoothWriter.bytesToHex(buffer));
+                    Log.e("PacketFinder", "Rejected: " + BluetoothWriter.bytesToHex(buffer));
                     return; //the packet was all garbage
                 }
                 //we need to dump the garbage before the header:
@@ -51,19 +57,19 @@ public class PacketFinder {
                     byte[] pkt = Arrays.copyOfRange(buffer, 1, DataPacket.packetLen-1);
                     Log.d("PacketFinder", "Found: " + BluetoothWriter.bytesToHex(pkt));
                     stack.add(new DataPacket(pkt)); //from 1 for framing reasons
-                    buffer = Arrays.copyOfRange(buffer, DataPacket.packetLen, buffer.length-1);
+                    buffer = Arrays.copyOfRange(buffer, DataPacket.packetLen-1, buffer.length-1); //keep the 0x42 in there
                     if(buffer.length > DataPacket.packetLen) {
                         push(buffer);
                     }
                     else {
-                        Log.d("PacketFinder", "Storing: " + BluetoothWriter.bytesToHex(buffer));
+                        Log.i("PacketFinder", "Store: " + BluetoothWriter.bytesToHex(buffer));
                         byteHolder = buffer;
                     }
                     return; //done!
                 }
                 else {
                     //there was /not/ enough data to fill a packet, but we have a header and a partial packet!
-                    Log.d("PacketFinder", "Storing: " + BluetoothWriter.bytesToHex(buffer));
+                    Log.d("PacketFinder", "Too small: " + BluetoothWriter.bytesToHex(buffer));
                     byteHolder = buffer;
                     return;
                 }

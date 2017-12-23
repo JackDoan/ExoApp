@@ -111,7 +111,6 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
             startStopScan();
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
