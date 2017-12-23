@@ -31,6 +31,8 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -60,10 +62,11 @@ import static edu.utdallas.locolab.exoapp.packet.CommandPacket.*;
 
 public class ExoControlActivity extends AppCompatActivity implements BluetoothService.OnBluetoothEventCallback{
     private int accel = 90000;
-    private TextView tv;
+    //private TextView tv;
     private EditText cmdArg;
     private ProgressBar battBar;
     private DataPacket data;
+    private Menu mMenu;
     private CMDSpinnerHandler cmdSpinnerHandler;
     private ActuatorSettingsAdaptor comex2;
 
@@ -85,16 +88,17 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         packetFinder = new PacketFinder();
         mService = BluetoothService.getDefaultInstance();
         mWriter = new BluetoothWriter(mService);
+        comex2 = new ActuatorSettingsAdaptor(mWriter);
         setContentView(R.layout.control_panel);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        setTitle("Control Panel");
         Switch stoSwitch = findViewById(R.id.stoID);
         Switch enableSwitch = findViewById(R.id.enableID);
         Button autoCal = findViewById(R.id.autoCalID);
         Button reset = findViewById(R.id.autoCalID2);
         Button sendButton = findViewById(R.id.sendCmdBtn);
-        tv = findViewById(R.id.sample_text);
         cmdArg = findViewById(R.id.cmdArg);
         battBar = findViewById(R.id.battBar);
 
@@ -129,8 +133,20 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
                 onClickSendCmd(v);
             }
         });
-
-        exoSetup();
+        cmdSpinnerHandler = new CMDSpinnerHandler(this,
+                (Spinner) findViewById(R.id.cmdSpinner),
+                cmdArg,
+                comex2
+        );
+        ControllerSpinnerHandler controllerSpinnerHandler = new ControllerSpinnerHandler(this,
+                (Spinner) findViewById(R.id.controlSpinner),
+                comex2
+        );
+        /*SensorListener mySensors = new SensorListener(
+                (SensorManager) getSystemService(SENSOR_SERVICE),
+                comex2,
+                (TextView) findViewById(R.id.sensorText)
+        );*/
     }
 
 
@@ -140,6 +156,24 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         mService.setOnEventCallback(this);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_control_panel, menu);
+        mMenu = menu;
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_share) {
+            //todo export saved data
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
     private void updateUI(DataPacket p) {
         if(p == null) {
@@ -162,7 +196,7 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         while(packetFinder.getPacketsAvailable() >= 1) {
             updateUI(packetFinder.pop());
         }
-        Log.d(TAG, "onDataRead: " + BluetoothWriter.bytesToHex(buffer));
+        //Log.d(TAG, "onDataRead: " + BluetoothWriter.bytesToHex(buffer));
 
     }
 
@@ -221,23 +255,6 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         cmdSpinnerHandler.sentClicked(); /*todo check for nulls*/
     }
 
-    private void exoSetup() {
-        comex2 = new ActuatorSettingsAdaptor(mWriter);
-        cmdSpinnerHandler = new CMDSpinnerHandler(this,
-                (Spinner) findViewById(R.id.cmdSpinner),
-                cmdArg,
-                comex2
-        );
-        ControllerSpinnerHandler controllerSpinnerHandler = new ControllerSpinnerHandler(this,
-                (Spinner) findViewById(R.id.controlSpinner),
-                comex2
-        );
-        SensorListener mySensors = new SensorListener(
-                (SensorManager) getSystemService(SENSOR_SERVICE),
-                comex2,
-                (TextView) findViewById(R.id.sensorText)
-        );
-    }
 
 
 }

@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
 
         mService.setOnScanCallback(this);
         mService.setOnEventCallback(this);
-        startStopScan();
+        //startStopScan();
     }
 
     @Override
