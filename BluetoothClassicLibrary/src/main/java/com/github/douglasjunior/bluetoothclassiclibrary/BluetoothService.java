@@ -24,6 +24,7 @@
 
 package com.github.douglasjunior.bluetoothclassiclibrary;
 
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
 import android.os.Handler;
 import android.util.Log;
@@ -39,6 +40,7 @@ public abstract class BluetoothService {
     // Debugging
     private static final String TAG = BluetoothService.class.getSimpleName();
     protected static BluetoothService mDefaultServiceInstance;
+    @SuppressLint("StaticFieldLeak") //this is okay because it's the Application's Context
     private static BluetoothConfiguration mDefaultConfiguration;
     private final Handler handler;
     protected BluetoothConfiguration mConfig;
@@ -50,14 +52,6 @@ public abstract class BluetoothService {
         this.mConfig = config;
         this.mStatus = BluetoothStatus.NONE;
         this.handler = new Handler();
-    }
-
-    /**
-     * Use {@link BluetoothService#init(BluetoothConfiguration)} instead.
-     */
-    @Deprecated
-    public static void setDefaultConfiguration(BluetoothConfiguration config) {
-        init(config);
     }
 
     /**

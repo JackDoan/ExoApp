@@ -76,8 +76,7 @@ public class BluetoothClassicService extends BluetoothService {
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                 // Get the BluetoothDevice object from the Intent
                 final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                // If it's already paired, skip it, because it's been listed
-                // already
+                // If it's already paired, skip it, because it's been listed already
                 final int RSSI = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE);
 
                 if (onScanCallback != null)
@@ -370,12 +369,14 @@ public class BluetoothClassicService extends BluetoothService {
                     int read = mmInStream.read();
                     temp = (byte) read;
 
-                    if (temp == byteDelimiter) {
+                    if (mConfig.useDelimeter && temp == byteDelimiter) {
                         if (i > 0) {
                             dispatchBuffer(buffer, i);
                             i = 0;
                         }
-                    } else if (i == buffer.length - 1) {
+                        continue;
+                    }
+                    if (i == buffer.length - 1) {
                         dispatchBuffer(buffer, i);
                         i = 0;
                     }

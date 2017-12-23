@@ -52,15 +52,11 @@ public class ExoApplication extends Application {
 
         config.context = getApplicationContext();
         config.bufferSize = 10240;
-        config.characterDelimiter = 0x69;
+        config.characterDelimiter = 0x42;
+        config.useDelimeter = true;
         config.deviceName = "ExoApp";
         config.callListenersInMainThread = true;
-
-        //config.uuid = null; // When using BluetoothLeService.class set null to show all devices on scan.
         config.uuid = UUID_DEVICE; // For Classic
-        //config.uuidService = UUID_SERVICE; // For BLE
-        //config.uuidCharacteristic = UUID_CHARACTERISTIC; // For BLE
-        //config.transport = BluetoothDevice.TRANSPORT_LE; // Only for dual-mode devices
 
         BluetoothService.init(config);
     }

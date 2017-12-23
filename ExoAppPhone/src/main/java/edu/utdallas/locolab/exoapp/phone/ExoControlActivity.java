@@ -61,6 +61,8 @@ import static edu.utdallas.locolab.exoapp.packet.CommandPacket.*;
  */
 
 public class ExoControlActivity extends AppCompatActivity implements BluetoothService.OnBluetoothEventCallback{
+    private static final String TAG = "ExoControlActivity";
+    private final String tag = "ExoControlPanel";
     private int accel = 90000;
     //private TextView tv;
     private EditText cmdArg;
@@ -69,17 +71,12 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
     private Menu mMenu;
     private CMDSpinnerHandler cmdSpinnerHandler;
     private ActuatorSettingsAdaptor comex2;
-
-    private static final String TAG = "ExoControlActivity";
-
     private FloatingActionButton mFab;
     private EditText mEdRead;
     private EditText mEdWrite;
-
     private BluetoothService mService;
     private BluetoothWriter mWriter;
     private PacketFinder packetFinder;
-    private final String tag = "ExoControlPanel";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,7 +88,7 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         comex2 = new ActuatorSettingsAdaptor(mWriter);
         setContentView(R.layout.control_panel);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setTitle("Control Panel");
         Switch stoSwitch = findViewById(R.id.stoID);
@@ -121,12 +118,12 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
             cmdSpinnerHandler.sentClicked(); /*todo check for nulls*/
         });
         cmdSpinnerHandler = new CMDSpinnerHandler(this,
-                (Spinner) findViewById(R.id.cmdSpinner),
+                findViewById(R.id.cmdSpinner),
                 cmdArg,
                 comex2
         );
         ControllerSpinnerHandler controllerSpinnerHandler = new ControllerSpinnerHandler(this,
-                (Spinner) findViewById(R.id.controlSpinner),
+                findViewById(R.id.controlSpinner),
                 comex2
         );
         /*SensorListener mySensors = new SensorListener(
@@ -179,12 +176,13 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
 
     @Override
     public void onDataRead(byte[] buffer, int length) {
+
+        //Log.d(TAG, "onDataRead: " + BluetoothWriter.bytesToHex(buffer));
+
         packetFinder.push(buffer);
         while(packetFinder.getPacketsAvailable() >= 1) {
             updateUI(packetFinder.pop());
         }
-        //Log.d(TAG, "onDataRead: " + BluetoothWriter.bytesToHex(buffer));
-
     }
 
     @Override

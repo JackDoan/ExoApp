@@ -66,7 +66,7 @@ public class BluetoothConfiguration {
      * {@link com.github.douglasjunior.bluetoothclassiclibrary.BluetoothService.OnBluetoothEventCallback#onDataRead(byte[], int)}
      */
     public char characterDelimiter;
-
+    public boolean useDelimeter;
     /**
      * Required in {@link BluetoothClassicService}, is the UUID of the device that will connect in serial mode. <br/>
      * Set {@link null} if you want to scan all devices.
@@ -74,13 +74,13 @@ public class BluetoothConfiguration {
     public UUID uuid;
 
     /**
-     * Required for {luetoothLeService} <br/>
+     * Required for {BluetoothLeService} <br/>
      * UUID of bluetooth service.
      */
     public UUID uuidService;
 
     /**
-     * Required for {luetoothLeService} <br/>
+     * Required for {BluetoothLeService} <br/>
      * UUID of bluetooth characteristic.
      */
     public UUID uuidCharacteristic;

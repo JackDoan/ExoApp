@@ -38,40 +38,45 @@ public class PacketFinder {
     }
 
     public void push(byte[] buffer) {
+        Log.d("PacketFinder", "Input: " + "           " + BluetoothWriter.bytesToHex(buffer));
         if(byteHolder == null) {
-            if(buffer.length < DataPacket.packetLen) {
+            if (buffer.length < DataPacket.packetLen - 2) {
                 byteHolder = buffer;
                 Log.d("PacketFinder", "Stored: " + BluetoothWriter.bytesToHex(buffer));
                 return; //the buffer is empty and we didn't get enough: hang onto it and return
             }
             else { //no buffer to splice, find and /maybe/ add a packet?
+
                 int head = findHeader(buffer);
                 if(head < 0) {
                     Log.e("PacketFinder", "Rejected: " + BluetoothWriter.bytesToHex(buffer));
                     return; //the packet was all garbage
                 }
+
                 //we need to dump the garbage before the header:
-                buffer = Arrays.copyOfRange(buffer, head, buffer.length-1);
-                if(buffer.length > DataPacket.packetLen) { //use > instead of >= to have fewer cases
+                buffer = Arrays.copyOfRange(buffer, head, buffer.length);
+
+                if (buffer.length >= DataPacket.packetLen - 2) {
                     //there should be an entire packet here!
-                    byte[] pkt = Arrays.copyOfRange(buffer, 0, DataPacket.packetLen - 1); //changed 1 to 0 bc delimiter
-                    Log.d("PacketFinder", "Found: " + BluetoothWriter.bytesToHex(pkt));
+                    byte[] pkt = Arrays.copyOfRange(buffer, 0, DataPacket.packetLen - 2); //changed 1 to 0 bc delimiter
+                    Log.d("PacketFinder", "Found: " + "           " + BluetoothWriter.bytesToHex(pkt));
                     stack.add(new DataPacket(pkt)); //from 1 for framing reasons
-                    buffer = Arrays.copyOfRange(buffer, DataPacket.packetLen-1, buffer.length-1); //keep the 0x42 in there
-                    if(buffer.length > DataPacket.packetLen) {
+                    buffer = Arrays.copyOfRange(buffer, DataPacket.packetLen - 2, buffer.length); //keep the 0x42 in there
+                    if (buffer.length >= DataPacket.packetLen - 2) {
                         push(buffer);
-                    }
-                    else {
-                        Log.i("PacketFinder", "Store: " + BluetoothWriter.bytesToHex(buffer));
+                    } else if (buffer.length == 0) {
+                        byteHolder = null;
+                    } else {
+                        Log.i("PacketFinder", "Store: " + "           " + BluetoothWriter.bytesToHex(buffer));
                         byteHolder = buffer;
+                        //done!
                     }
-                    return; //done!
                 }
                 else {
                     //there was /not/ enough data to fill a packet, but we have a header and a partial packet!
-                    Log.d("PacketFinder", "Too small: " + BluetoothWriter.bytesToHex(buffer));
+                    Log.d("PacketFinder", "Too small: " + "       " + BluetoothWriter.bytesToHex(buffer));
                     byteHolder = buffer;
-                    return;
+                    //done!
                 }
             }
         }
