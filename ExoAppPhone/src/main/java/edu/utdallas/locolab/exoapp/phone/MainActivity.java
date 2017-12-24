@@ -64,17 +64,19 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //todo: prompt to turn bt on
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setTitle("Select an Actuator:");
-        pgBar = (ProgressBar) findViewById(R.id.pg_bar);
+        pgBar = findViewById(R.id.pg_bar);
         pgBar.setVisibility(View.GONE);
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.rv);
+        mRecyclerView = findViewById(R.id.rv);
         LinearLayoutManager lm = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(lm);
 

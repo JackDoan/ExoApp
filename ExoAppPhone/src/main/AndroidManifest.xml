@@ -17,10 +17,10 @@
 
     <application
         android:name=".ExoApplication"
-        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher_adapt"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme.NoActionBar"
-        android:allowBackup="false">
+        android:theme="@style/AppTheme.NoActionBar">
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"

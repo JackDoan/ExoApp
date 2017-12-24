@@ -25,7 +25,6 @@
 package edu.utdallas.locolab.exoapp.phone;
 
 import android.app.Application;
-import android.bluetooth.BluetoothDevice;
 
 import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothClassicService;
 import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothConfiguration;
@@ -41,6 +40,7 @@ public class ExoApplication extends Application {
     private static final UUID UUID_DEVICE = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
     //private static final UUID UUID_SERVICE = UUID.fromString("e7810a71-73ae-499d-8c15-faa9aef0c3f2");
     //private static final UUID UUID_CHARACTERISTIC = UUID.fromString("bef8d6c9-9c21-4c9e-b632-bd58c1009f9f");
+
 
     @Override
     public void onCreate() {

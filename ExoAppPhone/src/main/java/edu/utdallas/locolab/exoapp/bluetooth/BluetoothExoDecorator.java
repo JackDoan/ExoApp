@@ -11,20 +11,20 @@ import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothDeviceDecorator
 public class BluetoothExoDecorator extends BluetoothDeviceDecorator {
 
     private final String exoFilter = "Comex";
-
-    public boolean isExo() {
-        return isExo;
-    }
-
     private boolean isExo = false;
 
     public BluetoothExoDecorator(BluetoothDevice device) {
         super(device);
-        isExo = device.getName().contains(exoFilter);
+        if (device.getName() != null)
+            isExo = device.getName().contains(exoFilter);
     }
 
     public BluetoothExoDecorator(BluetoothDevice device, int RSSI) {
         this(device);
         super.setRSSI(RSSI);
+    }
+
+    public boolean isExo() {
+        return isExo;
     }
 }

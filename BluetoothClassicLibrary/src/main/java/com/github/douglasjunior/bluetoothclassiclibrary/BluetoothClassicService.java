@@ -368,7 +368,8 @@ public class BluetoothClassicService extends BluetoothService {
                     // Read from the InputStream
                     int read = mmInStream.read();
                     temp = (byte) read;
-
+                    buffer[i] = temp;
+                    i++;
                     if (mConfig.useDelimeter && temp == byteDelimiter) {
                         if (i > 0) {
                             dispatchBuffer(buffer, i);
@@ -380,8 +381,8 @@ public class BluetoothClassicService extends BluetoothService {
                         dispatchBuffer(buffer, i);
                         i = 0;
                     }
-                    buffer[i] = temp;
-                    i++;
+                    //buffer[i] = temp;
+                    //i++;
                     //System.out.println("read: " + new String(buffer, 0 , i));
                 } catch (Exception e) {
                     Log.e(TAG, "disconnected", e);
