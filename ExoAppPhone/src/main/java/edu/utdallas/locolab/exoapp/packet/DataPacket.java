@@ -1,5 +1,8 @@
 package edu.utdallas.locolab.exoapp.packet;
 
+import io.objectbox.annotation.Entity;
+import io.objectbox.annotation.Id;
+
 /**
  * Created by jack on 12/22/17.
  */
@@ -43,6 +46,7 @@ public class DataPacket {
     private final int controlWord;
     private final int timestamp;
     private final int current;
+
 
     public DataPacket() {
         data = new byte[1];

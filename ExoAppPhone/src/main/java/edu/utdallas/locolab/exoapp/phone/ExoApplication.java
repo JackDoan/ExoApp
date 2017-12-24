@@ -32,19 +32,25 @@ import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothService;
 
 import java.util.UUID;
 
+import edu.utdallas.locolab.exoapp.packet.DataPacketDAO;
+import edu.utdallas.locolab.exoapp.packet.MyObjectBox;
+import io.objectbox.Box;
+import io.objectbox.BoxStore;
+import io.objectbox.android.AndroidObjectBrowser;
+
 /**
  * Created by jad140230 on 12/22/2017
  */
 public class ExoApplication extends Application {
 
     private static final UUID UUID_DEVICE = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
-    //private static final UUID UUID_SERVICE = UUID.fromString("e7810a71-73ae-499d-8c15-faa9aef0c3f2");
-    //private static final UUID UUID_CHARACTERISTIC = UUID.fromString("bef8d6c9-9c21-4c9e-b632-bd58c1009f9f");
 
+    private BoxStore boxStore;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        boxStore = MyObjectBox.builder().androidContext(ExoApplication.this).build();
 
         BluetoothConfiguration config = new BluetoothConfiguration();
 
@@ -59,5 +65,9 @@ public class ExoApplication extends Application {
         config.uuid = UUID_DEVICE; // For Classic
 
         BluetoothService.init(config);
+    }
+
+    public BoxStore getBoxStore() {
+        return boxStore;
     }
 }

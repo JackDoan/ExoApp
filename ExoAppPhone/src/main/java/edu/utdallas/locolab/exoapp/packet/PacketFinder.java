@@ -17,7 +17,7 @@ public class PacketFinder {
     private final boolean D = false;
     boolean saveData;
     private byte[] byteHolder;
-    private LinkedList<DataPacket> stack;
+    private LinkedList<DataPacketDAO> stack;
 
     public PacketFinder() {
         //byteHolder = new byte[DataPacket.packetLen];
@@ -67,7 +67,7 @@ public class PacketFinder {
                     //there should be an entire packet here!
                     byte[] pkt = Arrays.copyOfRange(buffer, 0, DataPacket.packetLen - 1); //changed 1 to 0 bc delimiter
                     log("Found: ", pkt);
-                    stack.add(new DataPacket(pkt)); //from 1 for framing reasons
+                    stack.add(new DataPacketDAO(pkt)); //from 1 for framing reasons
                     buffer = Arrays.copyOfRange(buffer, DataPacket.packetLen - 1, buffer.length); //keep the 0x42 in there
                     if (buffer.length >= DataPacket.packetLen - 1) {
                         push(buffer);
@@ -120,7 +120,7 @@ public class PacketFinder {
         return stack.size();
     }
 
-    public DataPacket pop() {
+    public DataPacketDAO pop() {
         return stack.removeFirst();
     }
 

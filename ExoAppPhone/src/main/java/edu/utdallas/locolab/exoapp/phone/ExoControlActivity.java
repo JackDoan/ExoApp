@@ -28,15 +28,18 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -47,12 +50,17 @@ import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothService;
 import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothStatus;
 import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothWriter;
 
+import java.util.LinkedList;
+
 import deprecated.CMDSpinnerHandler;
 import deprecated.ControllerSpinnerHandler;
 import edu.utdallas.locolab.exoapp.packet.ActuatorSettingsAdaptor;
 import edu.utdallas.locolab.exoapp.packet.CommandPacket;
 import edu.utdallas.locolab.exoapp.packet.DataPacket;
+import edu.utdallas.locolab.exoapp.packet.DataPacketDAO;
 import edu.utdallas.locolab.exoapp.packet.PacketFinder;
+import io.objectbox.Box;
+import io.objectbox.BoxStore;
 
 import static edu.utdallas.locolab.exoapp.packet.CommandPacket.*;
 
@@ -66,22 +74,22 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
     private int accel = 90000;
     //private TextView tv;
     private EditText cmdArg;
-    private ProgressBar battBar;
-    private DataPacket data;
-    private Menu mMenu;
     private CMDSpinnerHandler cmdSpinnerHandler;
     private ActuatorSettingsAdaptor comex2;
-    private FloatingActionButton mFab;
-    private EditText mEdRead;
-    private EditText mEdWrite;
     private BluetoothService mService;
     private BluetoothWriter mWriter;
     private PacketFinder packetFinder;
+    private BoxStore boxStore;
+    private Box<DataPacketDAO> dataBox;
+    private LinkedList<DataPacketDAO> dataBuffer;
+    private boolean saveData;
+    private DrawerLayout mDrawerLayout;
+    private ProgressBar batteryLevelBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        data = new DataPacket();
+        dataBuffer = new LinkedList<>();
         packetFinder = new PacketFinder();
         mService = BluetoothService.getDefaultInstance();
         mWriter = new BluetoothWriter(mService);
@@ -91,16 +99,24 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setTitle("Control Panel");
+        setProgressBarVisibility(true);
+
+        //toolbar.setTitle("Control Panel");
         Switch stoSwitch = findViewById(R.id.stoID);
         Switch enableSwitch = findViewById(R.id.enableID);
+        Switch saveDataSwitch = findViewById(R.id.saveDataSwitch);
         Button autoCal = findViewById(R.id.autoCalID);
         Button reset = findViewById(R.id.autoCalID2);
         Button sendButton = findViewById(R.id.sendCmdBtn);
+        ImageButton exportButton = findViewById(R.id.exportButton);
+        mDrawerLayout = findViewById(R.id.drawer_layout);
         cmdArg = findViewById(R.id.cmdArg);
-        battBar = findViewById(R.id.battBar);
+        batteryLevelBar = findViewById(R.id.batteryLevel);
 
         stoSwitch.setOnCheckedChangeListener((compoundButton, b) -> mWriter.write(buildSTOPacket(b)));
         enableSwitch.setOnCheckedChangeListener((compoundButton, b) -> mWriter.write(buildEnablePacket(b)));
+        saveData = false;
+        saveDataSwitch.setOnCheckedChangeListener((compoundButton, b) -> saveData = b);
 
         autoCal.setOnClickListener(v -> {
             mWriter.write(buildResetEncoderPacket());
@@ -117,6 +133,16 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         sendButton.setOnClickListener(v -> {
             cmdSpinnerHandler.sentClicked(); /*todo check for nulls*/
         });
+        exportButton.setOnClickListener(v -> {
+            Log.d(TAG, "Yay! We saved " + dataBox.count() + " things!");
+            if (mDrawerLayout.isDrawerOpen(Gravity.END)) {
+                mDrawerLayout.closeDrawer(Gravity.END, true);
+            } else {
+                mDrawerLayout.openDrawer(Gravity.END, true);
+            }
+
+            //todo export saved data
+        });
         cmdSpinnerHandler = new CMDSpinnerHandler(this,
                 findViewById(R.id.cmdSpinner),
                 cmdArg,
@@ -131,6 +157,10 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
                 comex2,
                 (TextView) findViewById(R.id.sensorText)
         );*/
+
+        boxStore = ((ExoApplication) getApplication()).getBoxStore();
+        dataBox = boxStore.boxFor(DataPacketDAO.class);
+        
     }
 
 
@@ -140,6 +170,7 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         mService.setOnEventCallback(this);
     }
 
+    /*
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_control_panel, menu);
@@ -152,12 +183,12 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         int id = item.getItemId();
 
         if (id == R.id.action_share) {
-            //todo export saved data
+
             return true;
         }
 
         return super.onOptionsItemSelected(item);
-    }
+    } */
 
     private void updateUI(DataPacket p) {
         if(p == null) {
@@ -165,14 +196,15 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         }
         else {
             if(android.os.Build.VERSION.SDK_INT >= 24) {
-                battBar.setProgress((int) p.getVoltagePercent(), true);
+                batteryLevelBar.setProgress((int) p.getVoltagePercent(), true);
             }
             else {
-                battBar.setProgress((int) p.getVoltagePercent());
+                batteryLevelBar.setProgress((int) p.getVoltagePercent());
             }
 
         }
     }
+
 
     @Override
     public void onDataRead(byte[] buffer, int length) {
@@ -181,7 +213,15 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
 
         packetFinder.push(buffer);
         while(packetFinder.getPacketsAvailable() >= 1) {
-            updateUI(packetFinder.pop());
+            dataBuffer.add(packetFinder.pop());
+        }
+        if (dataBuffer.size() >= 100) {
+            updateUI(dataBuffer.getLast());
+            if (saveData) {
+                dataBox.put(dataBuffer);
+                //boxStore.runInTxAsync(()->dataBox.put(dataBuffer.toArray(new DataPacketDAO[100])), null);
+                dataBuffer.clear();
+            }
         }
     }
 
