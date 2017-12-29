@@ -23,4 +23,5 @@
     <string name="utd_email">\@utdallas.edu</string>
     <string name="log_data">Log data:</string>
     <string name="write">Write:</string>
+    <string name="max_torque">Max Torque:</string>
 </resources>

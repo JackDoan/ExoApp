@@ -47,7 +47,7 @@ public class BluetoothDeviceDecorator {
 
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public String getName() {
-        return mDevice.getName() != null && mDevice.getName().length() != 0 ? mDevice.getName() : "Desconhecido...";
+        return mDevice.getName() != null && mDevice.getName().length() != 0 ? mDevice.getName() : "Unknown";
     }
 
     public String getAddress() {
@@ -77,11 +77,11 @@ public class BluetoothDeviceDecorator {
         return mDevice.hashCode();
     }
 
-    public void setDevice(BluetoothDevice device) {
-        this.mDevice = device;
-    }
-
     public BluetoothDevice getDevice() {
         return mDevice;
+    }
+
+    public void setDevice(BluetoothDevice device) {
+        this.mDevice = device;
     }
 }
