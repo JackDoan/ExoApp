@@ -24,9 +24,11 @@
 
 package edu.utdallas.locolab.exoapp.phone;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -37,12 +39,15 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.Spinner;
@@ -57,7 +62,6 @@ import java.util.LinkedList;
 
 import edu.utdallas.locolab.exoapp.packet.ActuatorSettingsAdaptor;
 import edu.utdallas.locolab.exoapp.packet.DataPacket;
-import edu.utdallas.locolab.exoapp.packet.DataPacketDAO;
 import edu.utdallas.locolab.exoapp.packet.PacketFinder;
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
@@ -80,12 +84,15 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
     private BluetoothWriter mWriter;
     private PacketFinder packetFinder;
     private BoxStore boxStore;
-    private Box<DataPacketDAO> dataBox;
-    private LinkedList<DataPacketDAO> dataBuffer;
+    private Box<DataPacket> dataBox;
+    private LinkedList<DataPacket> dataBuffer;
     private boolean saveData;
     private DrawerLayout mDrawerLayout;
     private ProgressBar batteryLevelBar;
+    private EditText manualInput;
+    private TextInputLayout manualInputLayout;
 
+    @SuppressLint({"ClickableViewAccessibility", "SetTextI18n"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -109,10 +116,10 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         Switch saveDataSwitch = findViewById(R.id.saveDataSwitch);
         Button autoCal = findViewById(R.id.autoCalID);
         Button reset = findViewById(R.id.autoCalID2);
-        //Button sendButton = findViewById(R.id.sendCmdBtn);
+        manualInput = findViewById(R.id.input_manual);
+        manualInputLayout = findViewById(R.id.input_layout_manual);
         ImageButton exportButton = findViewById(R.id.exportButton);
         mDrawerLayout = findViewById(R.id.drawer_layout);
-        //cmdArg = findViewById(R.id.cmdArg);
         batteryLevelBar = findViewById(R.id.batteryLevel);
         EditText thresholdValueBox = findViewById(R.id.thresholdVal);
         EditText torqueRampValueBox = findViewById(R.id.torqueRampVal);
@@ -125,66 +132,31 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         swingGainValueBox.setText(Float.toString(comex2.getSwingGain()));
         stanceGainValueBox.setText(Float.toString(comex2.getStanceGain()));
 
-        thresholdValueBox.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
+        thresholdValueBox.addTextChangedListener(new ExoTextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
-                String arg = s.toString();
-                comex2.setThreshold(Integer.valueOf(arg));
+                comex2.setThreshold(Integer.valueOf(s.toString()));
             }
         });
-        torqueRampValueBox.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
+        torqueRampValueBox.addTextChangedListener(new ExoTextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
-                String arg = s.toString();
-                comex2.setTorqueRamp(Integer.valueOf(arg));
+                comex2.setTorqueRamp(Integer.valueOf(s.toString()));
             }
         });
-        swingGainValueBox.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
+        swingGainValueBox.addTextChangedListener(new ExoTextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
-                String arg = s.toString();
-                comex2.setSwingGain(Float.valueOf(arg));
+                comex2.setSwingGain(Float.valueOf(s.toString()));
             }
         });
-        stanceGainValueBox.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
+        stanceGainValueBox.addTextChangedListener(new ExoTextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
-                String arg = s.toString();
-                comex2.setStanceGain(Float.valueOf(arg));
+                comex2.setStanceGain(Float.valueOf(s.toString()));
             }
         });
+
         maxTorqueSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -195,13 +167,12 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
+            public void onStartTrackingTouch(SeekBar seekBar) { }
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
+            public void onStopTrackingTouch(SeekBar seekBar) { }
         });
+        maxTorqueSeek.setOnTouchListener(new BoxBlocker());
 
         stoSwitch.setOnCheckedChangeListener((compoundButton, b) -> mWriter.write(buildSTOPacket(b)));
         enableSwitch.setOnCheckedChangeListener((compoundButton, b) -> mWriter.write(buildEnablePacket(b)));
@@ -230,6 +201,7 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
 
             //todo export saved data
         });
+        //exportButton.setOnTouchListener(new BoxBlocker());
         /*
         sendButton.setOnClickListener(v -> {
             cmdSpinnerHandler.sentClicked();
@@ -248,7 +220,7 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         );*/
 
         boxStore = ((ExoApplication) getApplication()).getBoxStore();
-        dataBox = boxStore.boxFor(DataPacketDAO.class);
+        dataBox = boxStore.boxFor(DataPacket.class);
         
     }
 
@@ -340,7 +312,26 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         Log.d(TAG, "onDataWrite");
     }
 
-    public class ControllerSpinnerHandler implements AdapterView.OnItemSelectedListener {
+
+    public void showSoftKeyboard(View view) {
+        if (view.requestFocus()) {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            if(imm != null)
+                imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
+        }
+    }
+
+    public void hideSoftKeyboard() {
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            if(imm != null)
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
+
+    private class ControllerSpinnerHandler implements AdapterView.OnItemSelectedListener {
 
         ArrayAdapter<CtrlSpinnerItem> spinnerAdapter;
         Spinner uiHandle;
@@ -363,11 +354,33 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
             CtrlSpinnerItem item = spinnerAdapter.getItem(position);
             if (item != null) {
                 comex2.setController(item.controller);
+                //hide all mode dependent views
+                manualInputLayout.setVisibility(View.INVISIBLE);
+                manualInput.setVisibility(View.INVISIBLE);
+                if(item.controller == comex2.CTRL_MANUAL) {
+                    manualInput.setHint("Manual Torque");
+                    manualInputLayout.setVisibility(View.VISIBLE);
+                    manualInput.setVisibility(View.VISIBLE);
+                    manualInput.setText("0.0");
+                    //manualInput.setHint("Torque");
+                    showSoftKeyboard(manualInput);
+                }
+                else if(item.controller == comex2.CTRL_POSITION) {
+                    manualInput.setHint("Manual Position");
+                    manualInputLayout.setVisibility(View.VISIBLE);
+                    manualInput.setVisibility(View.VISIBLE);
+                    manualInput.setText("0.0");
+                    //manualInput.setHint("Position");
+                    //todo show keyboard
+                    showSoftKeyboard(manualInput);
+                }
+                else {
+                    hideSoftKeyboard();
+                }
             }
         }
 
-        public void onNothingSelected(AdapterView<?> parent) {
-        }
+        public void onNothingSelected(AdapterView<?> parent) { }
 
         private class CtrlSpinnerItem {
             public String name;
@@ -385,5 +398,40 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         }
     }
 
+
+    private abstract class ExoTextWatcher implements TextWatcher{
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) { }
+    }
+
+    private class BoxBlocker implements View.OnTouchListener{
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            //ripped from https://stackoverflow.com/questions/24731137/difference-between-androidid-and-androidlabelfor
+            int action = event.getAction();
+            switch (action) {
+                case MotionEvent.ACTION_DOWN:
+                    // Disallow Drawer to intercept touch events.
+                    v.getParent().requestDisallowInterceptTouchEvent(true);
+                    break;
+
+                case MotionEvent.ACTION_UP:
+                    // Allow Drawer to intercept touch events.
+                    v.getParent().requestDisallowInterceptTouchEvent(false);
+                    break;
+            }
+            v.performClick();
+            // Handle seekbar touch events.
+            v.onTouchEvent(event);
+            return true;
+        }
+
+
+
+        BoxBlocker() { }
+    }
 
 }

@@ -2,34 +2,36 @@ package edu.utdallas.locolab.exoapp.packet;
 
 import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.Id;
+import io.objectbox.annotation.Transient;
 
 /**
  * Created by jack on 12/22/17.
  */
-
+@Entity
 public class DataPacket {
     public static final int packetLen = 45;
     public static final int startOfPacket = 0x69;
     public static final int endOfPacket = 0x42;
-    private final int voltageMax = 1530;//1680;
-    private final int voltageMin = 1150;
-    private final int JOINT_INDEX = 1;
-    private final int TORQUE_INDEX = JOINT_INDEX + 4;
-    private final int STATUS_INDEX = TORQUE_INDEX + 4;
-    private final int BALL_INDEX = STATUS_INDEX + 1;
-    private final int HEEL_INDEX = BALL_INDEX + 2;
-    private final int VOLTAGE_INDEX = HEEL_INDEX + 2;
-    private final int TEMPL_INDEX = VOLTAGE_INDEX + 2;
-    private final int TEMPR_INDEX = TEMPL_INDEX + 2;
-    private final int ROLL_INDEX = TEMPR_INDEX + 2;
-    private final int PITCH_INDEX = ROLL_INDEX + 4;
-    private final int YAW_INDEX = PITCH_INDEX + 4;
-    private final int ERROR_INDEX = YAW_INDEX + 1;
-    private final int STATUSWORD_INDEX = ERROR_INDEX + 2;
-    private final int CONTROLWORD_INDEX = STATUSWORD_INDEX + 2;
-    private final int TIMESTAMP_INDEX = CONTROLWORD_INDEX + 2;
-    private final int DC_CURRENT_INDEX = TIMESTAMP_INDEX + 4;
-    private final byte[] data;
+    private static final int voltageMax = 1530;//1680;
+    private static final int voltageMin = 1150;
+    private static final int JOINT_INDEX = 1;
+    private static final int TORQUE_INDEX = JOINT_INDEX + 4;
+    private static final int STATUS_INDEX = TORQUE_INDEX + 4;
+    private static final int BALL_INDEX = STATUS_INDEX + 1;
+    private static final int HEEL_INDEX = BALL_INDEX + 2;
+    private static final int VOLTAGE_INDEX = HEEL_INDEX + 2;
+    private static final int TEMPL_INDEX = VOLTAGE_INDEX + 2;
+    private static final int TEMPR_INDEX = TEMPL_INDEX + 2;
+    private static final int ROLL_INDEX = TEMPR_INDEX + 2;
+    private static final int PITCH_INDEX = ROLL_INDEX + 4;
+    private static final int YAW_INDEX = PITCH_INDEX + 4;
+    private static final int ERROR_INDEX = YAW_INDEX + 1;
+    private static final int STATUSWORD_INDEX = ERROR_INDEX + 2;
+    private static final int CONTROLWORD_INDEX = STATUSWORD_INDEX + 2;
+    private static final int TIMESTAMP_INDEX = CONTROLWORD_INDEX + 2;
+    private static final int DC_CURRENT_INDEX = TIMESTAMP_INDEX + 4;
+    @Transient
+    //private final byte[] data;
     private final int jointCounts;
     private final float torqueCommand;
     private final int status;
@@ -48,8 +50,19 @@ public class DataPacket {
     private final int current;
 
 
+    @Id
+    private long id;
+
+    public long getId() {
+        return this.id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
     public DataPacket() {
-        data = new byte[1];
+        //data = new byte[1];
         jointCounts = 0;
         torqueCommand = 0;
         status = 0;
@@ -69,7 +82,7 @@ public class DataPacket {
     }
 
     public DataPacket(byte[] in) {
-        data = in;
+        //data = in;
         jointCounts = bytesToInt(in, JOINT_INDEX, 4);
         torqueCommand = bytesToFloat(in, TORQUE_INDEX);
         status = (int) in[STATUS_INDEX];
@@ -171,8 +184,6 @@ public class DataPacket {
             toReturn = (bytesToInt(in, index, 2) << 16) |
                     (bytesToInt(in, index+2, 2));
         }
-
-
         return toReturn;
     }
 

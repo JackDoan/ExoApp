@@ -4,26 +4,87 @@
   "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
   "entities": [
     {
-      "id": "2:6958003940631387332",
-      "lastPropertyId": "1:2590416935847265774",
-      "name": "DataPacketDAO",
+      "id": "3:836737181461789318",
+      "lastPropertyId": "16:1802467432260337926",
+      "name": "DataPacket",
       "properties": [
         {
-          "id": "1:2590416935847265774",
+          "id": "1:3077020742157728164",
+          "name": "torqueCommand"
+        },
+        {
+          "id": "2:3231048882996987581",
+          "name": "status"
+        },
+        {
+          "id": "3:7191651806961154003",
+          "name": "ballSensor"
+        },
+        {
+          "id": "4:2900981134993167895",
+          "name": "heelSensor"
+        },
+        {
+          "id": "5:2994949620809556465",
+          "name": "voltage"
+        },
+        {
+          "id": "6:6978227544080974303",
+          "name": "tempL"
+        },
+        {
+          "id": "7:41491975918017363",
+          "name": "tempR"
+        },
+        {
+          "id": "8:6439668169819140402",
+          "name": "roll"
+        },
+        {
+          "id": "9:2087438930449617894",
+          "name": "pitch"
+        },
+        {
+          "id": "10:7362392059207538378",
+          "name": "yaw"
+        },
+        {
+          "id": "11:309845775642160593",
+          "name": "error"
+        },
+        {
+          "id": "12:8435481634140697938",
+          "name": "statusWord"
+        },
+        {
+          "id": "13:8515777082313432081",
+          "name": "controlWord"
+        },
+        {
+          "id": "14:1223018171463876889",
+          "name": "timestamp"
+        },
+        {
+          "id": "15:6874648431632848214",
+          "name": "current"
+        },
+        {
+          "id": "16:1802467432260337926",
           "name": "id"
         }
       ],
       "relations": []
     }
   ],
-  "lastEntityId": "2:6958003940631387332",
+  "lastEntityId": "3:836737181461789318",
   "lastIndexId": "0:0",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 4,
   "modelVersionParserMinimum": 4,
   "retiredEntityUids": [
-    2791520428331927851
+    2791520428331927851,
+    6958003940631387332
   ],
   "retiredIndexUids": [],
   "retiredPropertyUids": [
@@ -62,7 +123,8 @@
     5671770658687190694,
     6471462817551494186,
     8853442139050816092,
-    4779857068192455770
+    4779857068192455770,
+    2590416935847265774
   ],
   "retiredRelationUids": [],
   "version": 1

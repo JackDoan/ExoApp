@@ -142,6 +142,9 @@ public class ActuatorSettingsAdaptor {
     }
 
     public void setMaxTorque(int maxTorque) {
+        mWriter.write(
+                CommandPacket.buildChangeSettingPacket(CommandPacket.CMD_TORQUEMAX, maxTorque)
+        );
         this.maxTorque = maxTorque;
     }
 
@@ -150,6 +153,9 @@ public class ActuatorSettingsAdaptor {
     }
 
     public void setMinTorque(int minTorque) {
+        mWriter.write(
+                CommandPacket.buildChangeSettingPacket(CommandPacket.CMD_TORQUEMAX, minTorque)
+        );
         this.minTorque = minTorque;
     }
 

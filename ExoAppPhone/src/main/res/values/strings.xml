@@ -24,4 +24,7 @@
     <string name="log_data">Log data:</string>
     <string name="write">Write:</string>
     <string name="max_torque">Max Torque:</string>
+    <string name="export_data_desc">Export data</string>
+    <string name="save_with_space">Save</string>
+    <string name="manual_command">Manual Command</string>
 </resources>
