@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "3:836737181461789318",
-      "lastPropertyId": "16:1802467432260337926",
+      "lastPropertyId": "17:3805200149295241752",
       "name": "DataPacket",
       "properties": [
         {
@@ -71,6 +71,10 @@
         {
           "id": "16:1802467432260337926",
           "name": "id"
+        },
+        {
+          "id": "17:3805200149295241752",
+          "name": "jointCounts"
         }
       ],
       "relations": []

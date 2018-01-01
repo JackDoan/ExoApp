@@ -52,6 +52,7 @@ import edu.utdallas.locolab.exoapp.bluetooth.BluetoothExoDecorator;
 public class MainActivity extends AppCompatActivity implements BluetoothService.OnBluetoothScanCallback, BluetoothService.OnBluetoothEventCallback, DeviceItemAdapter.OnAdapterItemClickListener {
 
     public static final String TAG = "ExoApp";
+    private static final int REQUEST_ENABLE_BT = 1;
 
     private ProgressBar pgBar;
     private Menu mMenu;
@@ -64,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //todo: prompt to turn bt on
+
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -75,6 +76,16 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
         pgBar.setVisibility(View.GONE);
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        if(mBluetoothAdapter == null) {
+            Toast.makeText(this, R.string.no_bt_msg, Toast.LENGTH_LONG).show();
+            finish(); //abandon ship
+        } else if(!mBluetoothAdapter.isEnabled()) {
+            //prompt to turn bt on
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
+
 
         mRecyclerView = findViewById(R.id.rv);
         LinearLayoutManager lm = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
@@ -131,7 +142,15 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
         int index = mAdapter.getDevices().indexOf(dv);
         if (index < 0) {
             mAdapter.getDevices().add(dv);
-            mAdapter.notifyItemInserted(mAdapter.getDevices().size() - 1);
+            if(dv.isExo()) {
+                //put it on top
+                mAdapter.notifyItemInserted(0);
+            }
+            else {
+                //put it at the bottom
+                mAdapter.notifyItemInserted(mAdapter.getDevices().size() - 1);
+            }
+
         } else {
             mAdapter.getDevices().get(index).setDevice(device);
             mAdapter.getDevices().get(index).setRSSI(rssi);

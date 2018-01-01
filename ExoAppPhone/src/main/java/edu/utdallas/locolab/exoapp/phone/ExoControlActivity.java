@@ -39,7 +39,10 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -105,6 +108,8 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
     private int[] grantResults;
     private Switch saveDataSwitch;
     private ImageButton exportButton;
+    private RecyclerView mRecyclerView;
+    private ExperimentItemAdapter mAdapter;
 
     @SuppressLint({"ClickableViewAccessibility", "SetTextI18n"})
     @Override
@@ -144,6 +149,33 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         EditText swingGainValueBox = findViewById(R.id.swingGainVal);
         EditText stanceGainValueBox = findViewById(R.id.stanceGainVal);
         SeekBar maxTorqueSeek = findViewById(R.id.maxTorqueSeek);
+
+        mRecyclerView = findViewById(R.id.recyclerView);
+        LinearLayoutManager lm = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        mRecyclerView.setLayoutManager(lm);
+
+        //mAdapter = new DeviceItemAdapter(this, mBluetoothAdapter.getBondedDevices());
+        mAdapter = new ExperimentItemAdapter(this); //use the above to display paired devices
+        //mAdapter.setOnAdapterItemClickListener(this);
+        mRecyclerView.setAdapter(mAdapter);
+
+        ItemTouchHelper mIth = new ItemTouchHelper(
+                new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT) {
+                    public boolean onMove(RecyclerView recyclerView,
+                                          RecyclerView.ViewHolder viewHolder,
+                                          RecyclerView.ViewHolder target) {
+                        final int fromPos = viewHolder.getAdapterPosition();
+                        final int toPos = target.getAdapterPosition();
+                        //todo move item in `fromPos` to `toPos` in adapter.
+                        return true;// true if moved, false otherwise
+                    }
+                    public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                        Toast.makeText(getApplicationContext(), "You tried to remove this!", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+        mIth.attachToRecyclerView(mRecyclerView);
+
 
         thresholdValueBox.setText(Integer.toString(comex2.getThreshold()));
         torqueRampValueBox.setText(Integer.toString(comex2.getTorqueRamp()));
@@ -210,12 +242,18 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
             Toast.makeText(this, "Gait Reset!", Toast.LENGTH_LONG).show();
         });
         exportButton.setOnClickListener(v -> {
-            Log.d(TAG, "Yay! We saved " + dataBox.count() + " things!");
-            exportData();
+            //todo note, this adds new experiments right now
+
+            mAdapter.getExperiments().add(new ExperimentItem());
+            mAdapter.notifyItemInserted(0);
+
+
+            //Log.d(TAG, "Yay! We saved " + dataBox.count() + " things!");
+            //exportData();
         });
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
-            //if you dont have required permissions ask for it (only required for API 23+)
+            //if you don't have required permissions, ask (required for API 23+)
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, requestCode);
             onRequestPermissionsResult(requestCode, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, grantResults);
         }
@@ -368,7 +406,16 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
 
     @Override
     public void onStatusChange(BluetoothStatus status) {
-        Log.d(TAG, "onStatusChange: " + status);
+        switch (status) {
+            case NONE:
+                Log.e(TAG, "onStatusChange: " + status);
+                Toast.makeText(this, "Connection lost!", Toast.LENGTH_LONG).show();
+                //todo should we return to the connect screen?
+                break;
+            default:
+                Log.d(TAG, "onStatusChange: " + status);
+                break;
+        }
     }
 
     @Override

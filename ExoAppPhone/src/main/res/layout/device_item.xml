@@ -23,7 +23,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="MTP-II"
+                android:text="@string/example_item_name"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Large" />
 
             <ImageView
@@ -31,7 +31,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:contentDescription="Is this an exoskeleton?"
+                android:contentDescription="@string/is_this_an_exoskeleton"
                 app:srcCompat="@android:drawable/presence_online" />
         </LinearLayout>
 
@@ -45,14 +45,14 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="00:11:22:33:44:55"
+                android:text="@string/example_mac_addr"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
 
             <TextView
                 android:id="@+id/tv_rssi"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="-55"
+                android:text="@string/example_rssi"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
 
         </LinearLayout>

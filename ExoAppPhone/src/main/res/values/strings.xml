@@ -28,4 +28,10 @@
     <string name="save_with_space">Save</string>
     <string name="manual_command">Manual Command</string>
     <string name="no_extern_storage_perm_msg">Permission denied to access external storage. Data export is not available.</string>
+    <string name="no_bt_msg">Your device does not support Bluetooth. This app will not work.</string>
+    <string name="example_item_name">Example Item</string>
+    <string name="is_this_an_exoskeleton">Is this an exoskeleton?</string>
+    <string name="example_mac_addr">00:11:22:33:44:55</string>
+    <string name="example_rssi">-55</string>
+    <string name="experiment_name">Experiment Name</string>
 </resources>

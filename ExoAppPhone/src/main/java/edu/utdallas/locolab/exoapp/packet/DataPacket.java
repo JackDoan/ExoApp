@@ -13,8 +13,8 @@ import io.objectbox.annotation.Transient;
  */
 @Entity
 public class DataPacket {
-    public static final int packetLen = 45;
-    public static final int startOfPacket = 0x69;
+    static final int packetLen = 45;
+    static final int startOfPacket = 0x69;
     public static final int endOfPacket = 0x42;
     private static final int voltageMax = 1530;//1680;
     private static final int voltageMin = 1150;
@@ -34,7 +34,6 @@ public class DataPacket {
     private static final int CONTROLWORD_INDEX = STATUSWORD_INDEX + 2;
     private static final int TIMESTAMP_INDEX = CONTROLWORD_INDEX + 2;
     private static final int DC_CURRENT_INDEX = TIMESTAMP_INDEX + 4;
-    @Transient
     //private final byte[] data;
     private final int jointCounts;
     private final float torqueCommand;
@@ -129,8 +128,9 @@ public class DataPacket {
         return voltage;
     }
 
+    private static final double voltageRange = voltageMax-voltageMin;
     public double getVoltagePercent() {
-        return 100 * (double)(this.getVoltage()-this.voltageMin) / (double)(this.voltageMax-this.voltageMin);
+        return 100 * (double)(voltage-voltageMin) / voltageRange;
     }
 
     public int getTempL() {
