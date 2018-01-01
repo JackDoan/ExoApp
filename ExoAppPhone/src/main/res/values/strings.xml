@@ -27,4 +27,5 @@
     <string name="export_data_desc">Export data</string>
     <string name="save_with_space">Save</string>
     <string name="manual_command">Manual Command</string>
+    <string name="no_extern_storage_perm_msg">Permission denied to access external storage. Data export is not available.</string>
 </resources>

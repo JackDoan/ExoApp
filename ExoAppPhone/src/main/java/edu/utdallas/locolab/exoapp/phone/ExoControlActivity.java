@@ -24,21 +24,25 @@
 
 package edu.utdallas.locolab.exoapp.phone;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.hardware.SensorManager;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.StrictMode;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -47,7 +51,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.Spinner;
@@ -58,15 +61,21 @@ import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothService;
 import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothStatus;
 import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothWriter;
 
+import java.io.File;
+import java.lang.reflect.Method;
 import java.util.LinkedList;
 
 import edu.utdallas.locolab.exoapp.packet.ActuatorSettingsAdaptor;
 import edu.utdallas.locolab.exoapp.packet.DataPacket;
+import edu.utdallas.locolab.exoapp.packet.DataSaver;
 import edu.utdallas.locolab.exoapp.packet.PacketFinder;
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
+import io.objectbox.query.Query;
+import io.objectbox.query.QueryBuilder;
 
 import static edu.utdallas.locolab.exoapp.packet.CommandPacket.*;
+import static edu.utdallas.locolab.exoapp.packet.DataPacket_.id;
 
 /**
  * Created by jad140230 on 12/22/2017
@@ -92,10 +101,19 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
     private EditText manualInput;
     private TextInputLayout manualInputLayout;
 
+    private final int requestCode = 1;
+    private int[] grantResults;
+    private Switch saveDataSwitch;
+    private ImageButton exportButton;
+
     @SuppressLint({"ClickableViewAccessibility", "SetTextI18n"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+
+
         dataBuffer = new LinkedList<>();
         packetFinder = new PacketFinder();
         mService = BluetoothService.getDefaultInstance();
@@ -113,12 +131,12 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         ControllerSpinnerHandler ctrlSpinnerHandler = new ControllerSpinnerHandler(this, findViewById(R.id.controlSpinner));
         Switch stoSwitch = findViewById(R.id.stoID);
         Switch enableSwitch = findViewById(R.id.enableID);
-        Switch saveDataSwitch = findViewById(R.id.saveDataSwitch);
+        saveDataSwitch = findViewById(R.id.saveDataSwitch);
         Button autoCal = findViewById(R.id.autoCalID);
         Button reset = findViewById(R.id.autoCalID2);
         manualInput = findViewById(R.id.input_manual);
         manualInputLayout = findViewById(R.id.input_layout_manual);
-        ImageButton exportButton = findViewById(R.id.exportButton);
+        exportButton = findViewById(R.id.exportButton);
         mDrawerLayout = findViewById(R.id.drawer_layout);
         batteryLevelBar = findViewById(R.id.batteryLevel);
         EditText thresholdValueBox = findViewById(R.id.thresholdVal);
@@ -193,35 +211,61 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         });
         exportButton.setOnClickListener(v -> {
             Log.d(TAG, "Yay! We saved " + dataBox.count() + " things!");
-            if (mDrawerLayout.isDrawerOpen(Gravity.END)) {
-                mDrawerLayout.closeDrawer(Gravity.END, true);
-            } else {
-                mDrawerLayout.openDrawer(Gravity.END, true);
-            }
-
-            //todo export saved data
+            exportData();
         });
-        //exportButton.setOnTouchListener(new BoxBlocker());
-        /*
-        sendButton.setOnClickListener(v -> {
-            cmdSpinnerHandler.sentClicked();
-        });
-        cmdSpinnerHandler = new CMDSpinnerHandler(this,
-                findViewById(R.id.cmdSpinner),
-                cmdArg,
-                comex2
-        );*/
 
-
-        /*SensorListener mySensors = new SensorListener(
-                (SensorManager) getSystemService(SENSOR_SERVICE),
-                comex2,
-                (TextView) findViewById(R.id.sensorText)
-        );*/
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+            //if you dont have required permissions ask for it (only required for API 23+)
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, requestCode);
+            onRequestPermissionsResult(requestCode, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, grantResults);
+        }
 
         boxStore = ((ExoApplication) getApplication()).getBoxStore();
         dataBox = boxStore.boxFor(DataPacket.class);
         
+    }
+
+    private void exportData() {
+        DataSaver ds = new DataSaver(this::sendEmail);
+
+        if(ds.isFileOpen()) {
+            QueryBuilder<DataPacket> builder = dataBox.query();
+            Query<DataPacket> q = builder.notEqual(id,0).build(); //not ordering so we can use forEach
+            ds.setQuery(q);
+            //is this the best way to get all the data?
+            //todo add a way to access data without connecting
+            //also the id field can be used to order the data when it's plotting time
+            ds.start();
+        }
+        else {
+            Toast.makeText(this,"Data export failed.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void sendEmail(File file) {
+        if (Build.VERSION.SDK_INT >= 24) {
+            try {
+                Method m = StrictMode.class.getMethod("disableDeathOnFileUriExposure"); //todo fix this hack
+                m.invoke(null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        //todo don't hardcode this email address
+        intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"jack.doan" + "@utdallas.edu"});
+        intent.putExtra(Intent.EXTRA_SUBJECT, "Human Subject Experiment Data");
+        intent.putExtra(Intent.EXTRA_TEXT, "Congratulations! You have received some data!");
+        File root = Environment.getExternalStorageDirectory();
+        if (!file.exists() || !file.canRead()) {
+            //Toast.makeText(this, "Attachment Error", Toast.LENGTH_SHORT).show();
+            //finish();
+            return;
+        }
+        Uri uri = Uri.fromFile(file);
+        intent.putExtra(Intent.EXTRA_STREAM, uri);
+        startActivity(Intent.createChooser(intent, "Send email..."));
     }
 
 
@@ -251,33 +295,37 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         return super.onOptionsItemSelected(item);
     } */
 
+    private void updateUI(double batteryLevelPercent) {
+        if(android.os.Build.VERSION.SDK_INT >= 24) {
+            batteryLevelBar.setProgress((int) batteryLevelPercent, true);
+        }
+        else {
+            batteryLevelBar.setProgress((int) batteryLevelPercent);
+        }
+    }
+
     private void updateUI(DataPacket p) {
         if(p == null) {
             Log.e(tag, "updateUI was passed a null packet");
         }
         else {
-            if(android.os.Build.VERSION.SDK_INT >= 24) {
-                batteryLevelBar.setProgress((int) p.getVoltagePercent(), true);
-            }
-            else {
-                batteryLevelBar.setProgress((int) p.getVoltagePercent());
-            }
-
+            updateUI(p.getVoltagePercent());
         }
     }
 
 
     @Override
     public void onDataRead(byte[] buffer, int length) {
-
-        //Log.d(TAG, "onDataRead: " + BluetoothWriter.bytesToHex(buffer));
-
         packetFinder.push(buffer);
         while(packetFinder.getPacketsAvailable() >= 1) {
             dataBuffer.add(packetFinder.pop());
         }
         if (dataBuffer.size() >= 100) {
-            updateUI(dataBuffer.getLast());
+            double avgBatt = 0;
+            for(DataPacket p : dataBuffer) {
+                avgBatt += p.getVoltagePercent()/dataBuffer.size();
+            }
+            updateUI(avgBatt);
             if (saveData) {
                 dataBox.put(dataBuffer);
                 //boxStore.runInTxAsync(()->dataBox.put(dataBuffer.toArray(new DataPacketDAO[100])), null);
@@ -290,6 +338,32 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
     protected void onDestroy() {
         super.onDestroy();
         mService.disconnect();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    Log.d("permission", "granted");
+                } else {
+                    // permission denied, boo! Disable the functionality that depends on this permission
+                    Toast.makeText(this, R.string.no_extern_storage_perm_msg, Toast.LENGTH_LONG).show();
+                    saveDataSwitch.setVisibility(View.GONE);
+                    saveDataSwitch.setChecked(false);
+                    saveData = false;
+                    exportButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Toast.makeText(getApplicationContext(), R.string.no_extern_storage_perm_msg, Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+            }
+        }
     }
 
     @Override
@@ -330,6 +404,7 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         }
     }
 
+    /* UI element helper classes */
 
     private class ControllerSpinnerHandler implements AdapterView.OnItemSelectedListener {
 
@@ -398,7 +473,6 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         }
     }
 
-
     private abstract class ExoTextWatcher implements TextWatcher{
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
@@ -433,5 +507,7 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
 
         BoxBlocker() { }
     }
+
+    /* end UI element helper classes */
 
 }

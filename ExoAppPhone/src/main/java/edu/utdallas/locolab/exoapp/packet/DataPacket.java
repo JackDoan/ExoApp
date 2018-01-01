@@ -1,5 +1,9 @@
 package edu.utdallas.locolab.exoapp.packet;
 
+import android.support.annotation.NonNull;
+
+import org.jetbrains.annotations.Contract;
+
 import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.Id;
 import io.objectbox.annotation.Transient;
@@ -191,40 +195,31 @@ public class DataPacket {
         return Float.intBitsToFloat(bytesToInt(in, index, 4));
     }
 
+    @NonNull
+    @Contract(pure = true)
+    public static String getHeader() {
+        return "Record ID, Joint Angle (Counts), Torque Command (?), Status Byte, Ball Sensor, Heel Sensor, Battery Voltage, TempL, TempR, Roll, Pitch, Yaw, Error Byte, statusWord, controlWord, Timestamp, Current (0.1%)\n";
+    }
+
     @Override
     public String toString() {
-        return String.valueOf(jointCounts) +
-                ',' +
-                torqueCommand +
-                ',' +
-                status +
-                ',' +
-                ballSensor +
-                ',' +
-                heelSensor +
-                ',' +
-                voltage +
-                ',' +
-                tempL +
-                ',' +
-                tempR +
-                ',' +
-                roll +
-                ',' +
-                pitch +
-                ',' +
-                yaw +
-                ',' +
-                error +
-                ',' +
-                statusWord +
-                ',' +
-                controlWord +
-                ',' +
-                timestamp +
-                ',' +
-                current +
-                '\n';
+        return String.valueOf(id) + "," +
+                jointCounts + ',' +
+                torqueCommand + ',' +//this is to get from %1000 to %
+                status + ',' +
+                ballSensor + ',' +
+                heelSensor + ',' +
+                voltage + ',' +
+                tempL + ',' +
+                tempR + ',' +
+                roll + ',' +
+                pitch + ',' +
+                yaw + ',' +
+                error + ',' +
+                statusWord + ',' +
+                controlWord + ',' +
+                timestamp + ',' +
+                current + '\n';
     }
 
 }
