@@ -34,6 +34,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StrictMode;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -66,11 +67,16 @@ import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothWriter;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
+import edu.utdallas.locolab.exoapp.experiment.ExperimentItem;
+import edu.utdallas.locolab.exoapp.experiment.ExperimentItemAdapter;
 import edu.utdallas.locolab.exoapp.packet.ActuatorSettingsAdaptor;
 import edu.utdallas.locolab.exoapp.packet.DataPacket;
-import edu.utdallas.locolab.exoapp.packet.DataSaver;
+import edu.utdallas.locolab.exoapp.experiment.DataSaver;
+import edu.utdallas.locolab.exoapp.packet.DataPacket_;
 import edu.utdallas.locolab.exoapp.packet.PacketFinder;
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
@@ -78,7 +84,6 @@ import io.objectbox.query.Query;
 import io.objectbox.query.QueryBuilder;
 
 import static edu.utdallas.locolab.exoapp.packet.CommandPacket.*;
-import static edu.utdallas.locolab.exoapp.packet.DataPacket_.id;
 
 /**
  * Created by jad140230 on 12/22/2017
@@ -109,22 +114,21 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
     private Switch saveDataSwitch;
     private ImageButton exportButton;
     private RecyclerView mRecyclerView;
-    private ExperimentItemAdapter mAdapter;
+    private ExperimentItemAdapter experimentAdapter;
 
     @SuppressLint({"ClickableViewAccessibility", "SetTextI18n"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
-
-
         dataBuffer = new LinkedList<>();
         packetFinder = new PacketFinder();
         mService = BluetoothService.getDefaultInstance();
         mWriter = new BluetoothWriter(mService);
         comex2 = new ActuatorSettingsAdaptor(mWriter);
         setContentView(R.layout.control_panel);
+
+        boxStore = ((ExoApplication) getApplication()).getBoxStore();
+        dataBox = boxStore.boxFor(DataPacket.class);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -139,6 +143,7 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         saveDataSwitch = findViewById(R.id.saveDataSwitch);
         Button autoCal = findViewById(R.id.autoCalID);
         Button reset = findViewById(R.id.autoCalID2);
+        FloatingActionButton fab = findViewById(R.id.fab);
         manualInput = findViewById(R.id.input_manual);
         manualInputLayout = findViewById(R.id.input_layout_manual);
         exportButton = findViewById(R.id.exportButton);
@@ -153,28 +158,9 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         mRecyclerView = findViewById(R.id.recyclerView);
         LinearLayoutManager lm = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(lm);
-
-        //mAdapter = new DeviceItemAdapter(this, mBluetoothAdapter.getBondedDevices());
-        mAdapter = new ExperimentItemAdapter(this); //use the above to display paired devices
-        //mAdapter.setOnAdapterItemClickListener(this);
-        mRecyclerView.setAdapter(mAdapter);
-
-        ItemTouchHelper mIth = new ItemTouchHelper(
-                new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT) {
-                    public boolean onMove(RecyclerView recyclerView,
-                                          RecyclerView.ViewHolder viewHolder,
-                                          RecyclerView.ViewHolder target) {
-                        final int fromPos = viewHolder.getAdapterPosition();
-                        final int toPos = target.getAdapterPosition();
-                        //todo move item in `fromPos` to `toPos` in adapter.
-                        return true;// true if moved, false otherwise
-                    }
-                    public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                        Toast.makeText(getApplicationContext(), "You tried to remove this!", Toast.LENGTH_SHORT).show();
-                    }
-                }
-        );
-        mIth.attachToRecyclerView(mRecyclerView);
+        experimentAdapter = new ExperimentItemAdapter(this, boxStore); //use the above to display paired devices
+        mRecyclerView.setAdapter(experimentAdapter);
+        experimentAdapter.getTouchHelper().attachToRecyclerView(mRecyclerView);
 
 
         thresholdValueBox.setText(Integer.toString(comex2.getThreshold()));
@@ -242,14 +228,14 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
             Toast.makeText(this, "Gait Reset!", Toast.LENGTH_LONG).show();
         });
         exportButton.setOnClickListener(v -> {
-            //todo note, this adds new experiments right now
+            Log.d(TAG, "Yay! We saved " + dataBox.count() + " things!");
+            Toast.makeText(getApplicationContext(), "Building data file...", Toast.LENGTH_SHORT).show();
+            exportData();
+        });
 
-            mAdapter.getExperiments().add(new ExperimentItem());
-            mAdapter.notifyItemInserted(0);
+        fab.setOnClickListener(v -> {
+            experimentAdapter.add();
 
-
-            //Log.d(TAG, "Yay! We saved " + dataBox.count() + " things!");
-            //exportData();
         });
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
@@ -258,8 +244,7 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
             onRequestPermissionsResult(requestCode, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, grantResults);
         }
 
-        boxStore = ((ExoApplication) getApplication()).getBoxStore();
-        dataBox = boxStore.boxFor(DataPacket.class);
+
         
     }
 
@@ -268,7 +253,7 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
 
         if(ds.isFileOpen()) {
             QueryBuilder<DataPacket> builder = dataBox.query();
-            Query<DataPacket> q = builder.notEqual(id,0).build(); //not ordering so we can use forEach
+            Query<DataPacket> q = builder.notEqual(DataPacket_.id,0).build(); //not ordering so we can use forEach
             ds.setQuery(q);
             //is this the best way to get all the data?
             //todo add a way to access data without connecting
@@ -313,26 +298,6 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         mService.setOnEventCallback(this);
     }
 
-    /*
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_control_panel, menu);
-        mMenu = menu;
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_share) {
-
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    } */
-
     private void updateUI(double batteryLevelPercent) {
         if(android.os.Build.VERSION.SDK_INT >= 24) {
             batteryLevelBar.setProgress((int) batteryLevelPercent, true);
@@ -352,24 +317,35 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
     }
 
 
-    @Override
-    public void onDataRead(byte[] buffer, int length) {
-        packetFinder.push(buffer);
+    private double batteryAverage = 0;
+    @Override public void onDataRead(byte[] buffer, int length, long deviceAddr) {
+        final int dataBufferMax = 100;
+        packetFinder.push(deviceAddr, buffer);
+        List<ExperimentItem> recordingExperiments = experimentAdapter.getRecordingExperiments();
         while(packetFinder.getPacketsAvailable() >= 1) {
-            dataBuffer.add(packetFinder.pop());
+            DataPacket p = packetFinder.pop();
+            p.experiments.addAll(recordingExperiments);
+            dataBuffer.add(p);
+            batteryAverage += p.getVoltagePercent()/dataBufferMax;
         }
-        if (dataBuffer.size() >= 100) {
-            double avgBatt = 0;
-            for(DataPacket p : dataBuffer) {
-                avgBatt += p.getVoltagePercent()/dataBuffer.size();
+        if (dataBuffer.size() >= dataBufferMax) {
+            updateUI(batteryAverage);
+            batteryAverage = 0;
+            if(recordingExperiments.size() > 0) {
+                dataBox.put(dataBuffer);
             }
-            updateUI(avgBatt);
-            if (saveData) {
+            dataBuffer.clear();
+            /*if (saveData) {
                 dataBox.put(dataBuffer);
                 //boxStore.runInTxAsync(()->dataBox.put(dataBuffer.toArray(new DataPacketDAO[100])), null);
-                dataBuffer.clear();
-            }
+
+            }*/
         }
+    }
+
+    @Override
+    public void onDataRead(byte[] buffer, int length) {
+        this.onDataRead(buffer, length, 0);
     }
 
     @Override

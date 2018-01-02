@@ -337,7 +337,9 @@ public class BluetoothClassicService extends BluetoothService {
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
         private boolean canceled = false;
+        private long deviceAddr;
 
+        @RequiresPermission(Manifest.permission.BLUETOOTH)
         public ConnectedThread(BluetoothSocket socket) {
             Log.d(TAG, "create ConnectedThread");
             mmSocket = socket;
@@ -351,6 +353,14 @@ public class BluetoothClassicService extends BluetoothService {
             } catch (Exception e) {
                 Log.e(TAG, "temp sockets not created", e);
             }
+
+            String[] deviceAddrBytes = mmSocket.getRemoteDevice().getAddress().split(":");
+            long mac = 0;
+            for (int i = 0; i < 6; i++) {
+                long t = ((byte)Integer.parseInt(deviceAddrBytes[i], 16) & 0xffL) << ((5 - i) * 8);
+                mac |= t;
+            }
+            this.deviceAddr = mac;
 
             mmInStream = tmpIn;
             mmOutStream = tmpOut;
@@ -397,7 +407,7 @@ public class BluetoothClassicService extends BluetoothService {
             final byte[] data = new byte[i];
             System.arraycopy(buffer, 0, data, 0, i);
             if (onEventCallback != null) {
-                runOnMainThread(() -> onEventCallback.onDataRead(data, data.length));
+                runOnMainThread(() -> onEventCallback.onDataRead(data, data.length, deviceAddr));
             }
         }
 

@@ -11,25 +11,21 @@ import java.util.LinkedList;
 
 /**
  * Created by jack on 12/22/17.
+ *
  */
 
 public class PacketFinder {
     private final boolean D = false;
-    boolean saveData;
     private byte[] byteHolder;
     private LinkedList<DataPacket> stack;
 
     public PacketFinder() {
         //byteHolder = new byte[DataPacket.packetLen];
         stack = new LinkedList<>();
-        saveData = false;
     }
 
-    public void setSaveData(boolean b) {
-        saveData = b;
-    }
 
-    public byte[] concat(byte[] a, byte[] b) {
+    private byte[] concat(byte[] a, byte[] b) {
         int aLen = a.length;
         int bLen = b.length;
         byte[] c = new byte[aLen+bLen];
@@ -44,7 +40,7 @@ public class PacketFinder {
         }
     }
 
-    public void push(byte[] buffer) {
+    public void push(long device, byte[] buffer) {
         log("Input: ", buffer);
         if(byteHolder == null) {
             if (buffer.length < DataPacket.packetLen - 1) {
@@ -67,10 +63,10 @@ public class PacketFinder {
                     //there should be an entire packet here!
                     byte[] pkt = Arrays.copyOfRange(buffer, 0, DataPacket.packetLen - 1); //changed 1 to 0 bc delimiter
                     log("Found: ", pkt);
-                    stack.add(new DataPacket(pkt)); //from 1 for framing reasons
+                    stack.add(new DataPacket(device, pkt)); //from 1 for framing reasons
                     buffer = Arrays.copyOfRange(buffer, DataPacket.packetLen - 1, buffer.length); //keep the 0x42 in there
                     if (buffer.length >= DataPacket.packetLen - 1) {
-                        push(buffer);
+                        push(device, buffer);
                     } else if (buffer.length == 0) {
                         byteHolder = null;
                     } else {
@@ -91,7 +87,7 @@ public class PacketFinder {
             //there's something in the byteHolder
             buffer = concat(byteHolder, buffer);
             byteHolder = null;
-            push(buffer); //recursive call baby!
+            push(device, buffer); //recursive call baby!
         }
     }
 

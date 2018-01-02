@@ -39,7 +39,7 @@ import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothWriter;
 /**
  * Created by jad140230 on 12/22/2017
  */
-
+@Deprecated
 public class DeviceActivity extends AppCompatActivity implements BluetoothService.OnBluetoothEventCallback, View.OnClickListener {
 
     private static final String TAG = "DeviceActivity";
@@ -74,10 +74,16 @@ public class DeviceActivity extends AppCompatActivity implements BluetoothServic
         mService.setOnEventCallback(this);
     }
 
+
     @Override
-    public void onDataRead(byte[] buffer, int length) {
+    public void onDataRead(byte[] buffer, int length, long device) {
         Log.d(TAG, "onDataRead: " + new String(buffer, 0, length));
         mEdRead.append("< " + new String(buffer, 0, length) + "\n");
+    }
+
+    @Override
+    public void onDataRead(byte[] buffer, int length) {
+        onDataRead(buffer, length, 0);
     }
 
     @Override

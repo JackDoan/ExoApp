@@ -195,6 +195,8 @@ public abstract class BluetoothService {
     public interface OnBluetoothEventCallback {
         void onDataRead(byte[] buffer, int length);
 
+        void onDataRead(byte[] buffer, int length, long deviceAddr);
+
         void onStatusChange(BluetoothStatus status);
 
         void onDeviceName(String deviceName);

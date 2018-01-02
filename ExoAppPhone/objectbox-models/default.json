@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "3:836737181461789318",
-      "lastPropertyId": "17:3805200149295241752",
+      "lastPropertyId": "19:5460438487842097990",
       "name": "DataPacket",
       "properties": [
         {
@@ -75,14 +75,39 @@
         {
           "id": "17:3805200149295241752",
           "name": "jointCounts"
+        },
+        {
+          "id": "18:5925877896625375556",
+          "name": "device"
+        }
+      ],
+      "relations": [
+        {
+          "id": "1:5487476353016956345",
+          "name": "experiments"
+        }
+      ]
+    },
+    {
+      "id": "4:5060942433149532444",
+      "lastPropertyId": "2:8892030627635767589",
+      "name": "ExperimentItem",
+      "properties": [
+        {
+          "id": "1:2146289040683428475",
+          "name": "id"
+        },
+        {
+          "id": "2:8892030627635767589",
+          "name": "recording"
         }
       ],
       "relations": []
     }
   ],
-  "lastEntityId": "3:836737181461789318",
-  "lastIndexId": "0:0",
-  "lastRelationId": "0:0",
+  "lastEntityId": "4:5060942433149532444",
+  "lastIndexId": "1:121390089955306565",
+  "lastRelationId": "1:5487476353016956345",
   "lastSequenceId": "0:0",
   "modelVersion": 4,
   "modelVersionParserMinimum": 4,
@@ -90,7 +115,9 @@
     2791520428331927851,
     6958003940631387332
   ],
-  "retiredIndexUids": [],
+  "retiredIndexUids": [
+    121390089955306565
+  ],
   "retiredPropertyUids": [
     8264219066161901818,
     951076928814568025,
@@ -128,7 +155,8 @@
     6471462817551494186,
     8853442139050816092,
     4779857068192455770,
-    2590416935847265774
+    2590416935847265774,
+    5460438487842097990
   ],
   "retiredRelationUids": [],
   "version": 1

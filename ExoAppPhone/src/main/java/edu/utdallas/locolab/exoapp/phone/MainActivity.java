@@ -137,6 +137,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
 
     @Override
     public void onDeviceDiscovered(BluetoothDevice device, int rssi) {
+        /*todo: this has a bug that makes it so if there is something at index 0, and we find an exoskeleton, the existing item gets duplicated */
         Log.d(TAG, "onDeviceDiscovered: " + device.getName() + " - " + device.getAddress() + " - " + Arrays.toString(device.getUuids()));
         BluetoothExoDecorator dv = new BluetoothExoDecorator(device, rssi);
         int index = mAdapter.getDevices().indexOf(dv);
@@ -176,6 +177,11 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
 
     @Override
     public void onDataRead(byte[] buffer, int length) {
+        onDataRead(buffer, length, 0);
+    }
+
+    @Override
+    public void onDataRead(byte[] buffer, int length, long deviceAddr) {
         Log.d(TAG, "onDataRead");
     }
 

@@ -4,9 +4,12 @@ import android.support.annotation.NonNull;
 
 import org.jetbrains.annotations.Contract;
 
+import edu.utdallas.locolab.exoapp.experiment.ExperimentItem;
 import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.Id;
+import io.objectbox.annotation.Index;
 import io.objectbox.annotation.Transient;
+import io.objectbox.relation.ToMany;
 
 /**
  * Created by jack on 12/22/17.
@@ -51,10 +54,15 @@ public class DataPacket {
     private final int controlWord;
     private final int timestamp;
     private final int current;
+    private final long device;
 
 
-    @Id
-    private long id;
+
+
+
+
+
+    @Id private long id;
 
     public long getId() {
         return this.id;
@@ -63,6 +71,8 @@ public class DataPacket {
     public void setId(long id) {
         this.id = id;
     }
+
+    public ToMany<ExperimentItem> experiments;
 
     public DataPacket() {
         //data = new byte[1];
@@ -82,10 +92,12 @@ public class DataPacket {
         controlWord = 0;
         timestamp = 0;
         current = 0;
+        device = 0;
     }
 
-    public DataPacket(byte[] in) {
+    public DataPacket(long device, byte[] in) {
         //data = in;
+        this.device = device;
         jointCounts = bytesToInt(in, JOINT_INDEX, 4);
         torqueCommand = bytesToFloat(in, TORQUE_INDEX);
         status = (int) in[STATUS_INDEX];
@@ -103,6 +115,8 @@ public class DataPacket {
         timestamp = bytesToInt(in, TIMESTAMP_INDEX, 4);
         current = bytesToInt(in, DC_CURRENT_INDEX, 2);
     }
+
+    public long getDevice() { return device; }
 
     public int getJointCounts() {
         return jointCounts;
@@ -198,12 +212,13 @@ public class DataPacket {
     @NonNull
     @Contract(pure = true)
     public static String getHeader() {
-        return "Record ID, Joint Angle (Counts), Torque Command (?), Status Byte, Ball Sensor, Heel Sensor, Battery Voltage, TempL, TempR, Roll, Pitch, Yaw, Error Byte, statusWord, controlWord, Timestamp, Current (0.1%)\n";
+        return "Record ID, Device MAC Address, Joint Angle (Counts), Torque Command (?), Status Byte, Ball Sensor, Heel Sensor, Battery Voltage, TempL, TempR, Roll, Pitch, Yaw, Error Byte, statusWord, controlWord, Timestamp, Current (0.1%)\n";
     }
 
     @Override
     public String toString() {
         return String.valueOf(id) + "," +
+                device + "," +
                 jointCounts + ',' +
                 torqueCommand + ',' +//this is to get from %1000 to %
                 status + ',' +

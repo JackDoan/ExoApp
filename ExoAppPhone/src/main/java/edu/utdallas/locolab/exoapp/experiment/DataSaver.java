@@ -1,4 +1,4 @@
-package edu.utdallas.locolab.exoapp.packet;
+package edu.utdallas.locolab.exoapp.experiment;
 
 /**
  * Created by jack on 12/23/17.

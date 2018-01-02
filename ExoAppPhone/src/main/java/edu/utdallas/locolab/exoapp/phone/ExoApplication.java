@@ -32,7 +32,7 @@ import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothService;
 
 import java.util.UUID;
 
-import edu.utdallas.locolab.exoapp.packet.MyObjectBox;
+import edu.utdallas.locolab.exoapp.MyObjectBox;
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.android.AndroidObjectBrowser;
