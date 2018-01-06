@@ -25,11 +25,14 @@
 package edu.utdallas.locolab.exoapp.experiment;
 
 import android.content.Context;
+import android.support.design.widget.BaseTransientBottomBar;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,6 +46,7 @@ import java.util.List;
 import java.util.Set;
 
 import edu.utdallas.locolab.exoapp.packet.DataPacket;
+import edu.utdallas.locolab.exoapp.packet.DataPacket_;
 import edu.utdallas.locolab.exoapp.phone.ExoApplication;
 import edu.utdallas.locolab.exoapp.phone.R;
 import io.objectbox.Box;
@@ -50,6 +54,8 @@ import io.objectbox.BoxStore;
 import io.objectbox.query.Query;
 import io.objectbox.query.QueryBuilder;
 import io.objectbox.query.QueryConsumer;
+
+import static edu.utdallas.locolab.exoapp.phone.MainActivity.TAG;
 
 /**
  * Created by douglas on 10/04/2017
@@ -65,14 +71,15 @@ public class ExperimentItemAdapter extends RecyclerView.Adapter<ExperimentItemAd
     private List<ExperimentItem> recordingExperiments;
     private final LayoutInflater mInflater;
     private Box<ExperimentItem> experimentBox;
-
-
+    private Box<DataPacket> dataBox;
     private ItemTouchHelper touchHelper;
 
     public ExperimentItemAdapter(Context context, BoxStore boxStore) {
         super();
         mContext = context;
+
         experimentBox = boxStore.boxFor(ExperimentItem.class);
+        dataBox = boxStore.boxFor(DataPacket.class);
         recordingExperiments = new ArrayList<>();
         experimentItems = importExperiments();
         mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -151,6 +158,30 @@ public class ExperimentItemAdapter extends RecyclerView.Adapter<ExperimentItemAd
         this.notifyItemInserted(0);
     }
 
+
+    ExperimentItem toDelete;
+    public void remove(int pos) {
+        //this hides the view
+        toDelete = experimentItems.get(pos);
+        if(recordingExperiments.contains(toDelete)) {
+            recordingExperiments.remove(pos);
+        }
+        experimentItems.remove(pos);
+    }
+
+    public void delete(int pos) {
+        //this actually removes the item from the db
+        if(toDelete != null) {
+            //todo remove this experiment from all data packets
+            //todo remove experiment
+            //todo remove orphaned data packets
+            //dataBox.query().equal(DataPacket_.experiments, toDelete).build().remove();
+        }
+        else {
+            Log.e(this.getClass().getSimpleName(), "delete() called on "+pos+" while toDelete was null");
+        }
+    }
+
     static class ViewHolder extends RecyclerView.ViewHolder {
 
         private TextInputEditText experimentName;
@@ -178,8 +209,22 @@ public class ExperimentItemAdapter extends RecyclerView.Adapter<ExperimentItemAd
             //todo when the snackbar goes away:
             //todo delete the experiment
             //todo fire off a query to remove orphaned data items
+            int pos = viewHolder.getLayoutPosition();
+            Snackbar snack = Snackbar.make(viewHolder.itemView, "Experiment Removed", Snackbar.LENGTH_LONG);
+            snack.setAction("Undo", view -> ExperimentItemAdapter.this.notifyItemChanged(viewHolder.getLayoutPosition()));
+            snack.addCallback(new Snackbar.Callback() {
+                @Override public void onDismissed(Snackbar snackbar, int event) {
+                    if(event != Snackbar.Callback.DISMISS_EVENT_ACTION) {
+                        ExperimentItemAdapter.this.remove(pos);
+                        ExperimentItemAdapter.this.notifyItemRemoved(pos);
+                        Toast.makeText(viewHolder.itemView.getContext(), "You tried to remove this!", Toast.LENGTH_SHORT).show();
+                    }
 
-            Toast.makeText(viewHolder.itemView.getContext(), "You tried to remove this!", Toast.LENGTH_SHORT).show();
+                }
+            });
+            snack.show();
+
+
         }
     };
 

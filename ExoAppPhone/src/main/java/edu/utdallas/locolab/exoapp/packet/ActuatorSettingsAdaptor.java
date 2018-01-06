@@ -11,6 +11,8 @@ package edu.utdallas.locolab.exoapp.packet;
 import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothWriter;
 
 import static edu.utdallas.locolab.exoapp.packet.ActuatorSettingsAdaptor.SettingID.*;
+import static edu.utdallas.locolab.exoapp.packet.CommandPacket.buildEnablePacket;
+import static edu.utdallas.locolab.exoapp.packet.CommandPacket.buildSTOPacket;
 
 public class ActuatorSettingsAdaptor {
 
@@ -159,6 +161,10 @@ public class ActuatorSettingsAdaptor {
         this.minTorque = minTorque;
     }
 
+    public void setPower(boolean b) {
+        new PowerUp(b).start();
+    }
+
     private final BluetoothWriter mWriter;
     private float swingGain;
     private float stanceGain;
@@ -189,6 +195,25 @@ public class ActuatorSettingsAdaptor {
         controller = 1; //qsi, 3=manual todo clean this up
         manualTorque = 0.0f;
         lastUsed = NONE;
+
+    }
+
+    public class PowerUp extends Thread {
+        boolean onOff; //true == on
+        public PowerUp(boolean b) {
+            onOff = b;
+        }
+        public void run() {
+
+            try {
+                mWriter.write(buildSTOPacket(onOff));
+                Thread.sleep(7,500);
+                mWriter.write(buildEnablePacket(onOff));
+            } catch (InterruptedException e) {
+                mWriter.write(buildEnablePacket(onOff));
+            }
+
+        }
 
     }
 

@@ -43,7 +43,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -67,7 +66,6 @@ import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothWriter;
 
 import java.io.File;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -103,7 +101,6 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
     private BoxStore boxStore;
     private Box<DataPacket> dataBox;
     private LinkedList<DataPacket> dataBuffer;
-    private boolean saveData;
     private DrawerLayout mDrawerLayout;
     private ProgressBar batteryLevelBar;
     private EditText manualInput;
@@ -111,7 +108,7 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
 
     private final int requestCode = 1;
     private int[] grantResults;
-    private Switch saveDataSwitch;
+    private Switch powerSwitch;
     private ImageButton exportButton;
     private RecyclerView mRecyclerView;
     private ExperimentItemAdapter experimentAdapter;
@@ -138,9 +135,9 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         //toolbar.setTitle("Control Panel");
 
         ControllerSpinnerHandler ctrlSpinnerHandler = new ControllerSpinnerHandler(this, findViewById(R.id.controlSpinner));
-        Switch stoSwitch = findViewById(R.id.stoID);
-        Switch enableSwitch = findViewById(R.id.enableID);
-        saveDataSwitch = findViewById(R.id.saveDataSwitch);
+        //Switch stoSwitch = findViewById(R.id.stoID);
+        //Switch enableSwitch = findViewById(R.id.enableID);
+        powerSwitch = findViewById(R.id.powerSwitch);
         Button autoCal = findViewById(R.id.autoCalID);
         Button reset = findViewById(R.id.autoCalID2);
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -210,10 +207,11 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
         });
         maxTorqueSeek.setOnTouchListener(new BoxBlocker());
 
-        stoSwitch.setOnCheckedChangeListener((compoundButton, b) -> mWriter.write(buildSTOPacket(b)));
-        enableSwitch.setOnCheckedChangeListener((compoundButton, b) -> mWriter.write(buildEnablePacket(b)));
-        saveData = false;
-        saveDataSwitch.setOnCheckedChangeListener((compoundButton, b) -> saveData = b);
+        //stoSwitch.setOnCheckedChangeListener((compoundButton, b) -> mWriter.write(buildSTOPacket(b)));
+        //enableSwitch.setOnCheckedChangeListener((compoundButton, b) -> mWriter.write(buildEnablePacket(b)));
+        powerSwitch.setOnCheckedChangeListener((compoundButton, b) -> {
+            comex2.setPower(b);
+        });
 
         autoCal.setOnClickListener(v -> {
             mWriter.write(buildResetEncoderPacket());
@@ -366,15 +364,10 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
                 } else {
                     // permission denied, boo! Disable the functionality that depends on this permission
                     Toast.makeText(this, R.string.no_extern_storage_perm_msg, Toast.LENGTH_LONG).show();
-                    saveDataSwitch.setVisibility(View.GONE);
-                    saveDataSwitch.setChecked(false);
-                    saveData = false;
-                    exportButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Toast.makeText(getApplicationContext(), R.string.no_extern_storage_perm_msg, Toast.LENGTH_LONG).show();
-                        }
-                    });
+                    powerSwitch.setVisibility(View.GONE);
+                    powerSwitch.setChecked(false);
+                    //todo turn all experiments off, disable their switches
+                    exportButton.setOnClickListener(v -> Toast.makeText(getApplicationContext(), R.string.no_extern_storage_perm_msg, Toast.LENGTH_LONG).show());
                 }
             }
         }
@@ -452,9 +445,7 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
             CtrlSpinnerItem item = spinnerAdapter.getItem(position);
             if (item != null) {
                 comex2.setController(item.controller);
-                //hide all mode dependent views
-                manualInputLayout.setVisibility(View.INVISIBLE);
-                manualInput.setVisibility(View.INVISIBLE);
+
                 if(item.controller == comex2.CTRL_MANUAL) {
                     manualInput.setHint("Manual Torque");
                     manualInputLayout.setVisibility(View.VISIBLE);
@@ -474,7 +465,10 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
                 }
                 else {
                     hideSoftKeyboard();
+                    manualInputLayout.setVisibility(View.GONE);
+                    manualInput.setVisibility(View.GONE);
                 }
+                manualInputLayout.invalidate();
             }
         }
 

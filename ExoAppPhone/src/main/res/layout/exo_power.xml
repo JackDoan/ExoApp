@@ -11,52 +11,26 @@
         android:layout_height="48dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
         android:layout_weight="1"
         android:text="@string/reset_button_text"
         android:textAppearance="@style/TextAppearance.AppCompat.Widget.Button"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/autoCalID"
-        app:layout_constraintTop_toBottomOf="@+id/enableID" />
+        app:layout_constraintTop_toBottomOf="@+id/input_layout_manual" />
 
     <Button
         android:id="@+id/autoCalID"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
         android:layout_weight="1"
         android:text="@string/auto_calibrate_button_text"
         android:textAppearance="@style/TextAppearance.AppCompat.Widget.Button"
-        app:layout_constraintBottom_toBottomOf="@+id/autoCalID2"
         app:layout_constraintEnd_toStartOf="@+id/autoCalID2"
         app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/stoID" />
-
-    <Switch
-        android:id="@+id/enableID"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:text="@string/enableButtonText"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/stoID"
-        app:layout_constraintTop_toBottomOf="@+id/controlSpinner" />
-
-    <Switch
-        android:id="@+id/stoID"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:text="@string/stoSwitchLabel"
-        app:layout_constraintBottom_toBottomOf="@+id/enableID"
-        app:layout_constraintEnd_toStartOf="@+id/enableID"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/controlSpinner" />
+        app:layout_constraintTop_toTopOf="@+id/autoCalID2" />
 
     <Spinner
         android:id="@+id/controlSpinner"
@@ -66,8 +40,8 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/enableID"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/input_layout_manual"
+        app:layout_constraintEnd_toStartOf="@+id/input_layout_manual"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/controlModeLabel" />
 
@@ -85,17 +59,18 @@
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/input_layout_manual"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:labelFor="@id/input_manual"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/autoCalID2"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/autoCalID2">
+        app:layout_constraintHorizontal_bias="0.88"
+        app:layout_constraintStart_toEndOf="@+id/controlSpinner"
+        app:layout_constraintTop_toTopOf="parent">
 
         <android.support.design.widget.TextInputEditText
             android:id="@+id/input_manual"

@@ -27,7 +27,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/batteryLevel"
-            app:layout_constraintVertical_bias="0.0"
             app:layout_constraintVertical_chainStyle="spread" />
 
 
@@ -62,7 +61,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
                         android:layout_marginBottom="8dp"
-                        android:layout_marginEnd="16dp"
+                        android:layout_marginEnd="24dp"
                         android:layout_marginTop="8dp"
                         android:layout_weight="5"
                         android:background="@color/colorPrimary"
@@ -73,7 +72,7 @@
                         app:srcCompat="?attr/actionModeShareDrawable" />
 
                     <Switch
-                        android:id="@+id/saveDataSwitch"
+                        android:id="@+id/powerSwitch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
@@ -82,7 +81,7 @@
                         android:layout_marginTop="8dp"
                         android:layout_weight="10"
                         android:splitTrack="true"
-                        android:text="@string/save_with_space"
+                        android:text="Power:   "
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/exportButton"
                         app:layout_constraintTop_toTopOf="parent" />

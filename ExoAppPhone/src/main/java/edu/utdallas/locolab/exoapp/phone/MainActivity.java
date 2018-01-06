@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
         setTitle("Select an Actuator:");
         pgBar = findViewById(R.id.pg_bar);
         pgBar.setVisibility(View.GONE);
-
+        //todo request bt permissions
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         if(mBluetoothAdapter == null) {

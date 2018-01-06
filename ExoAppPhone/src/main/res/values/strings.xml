@@ -1,4 +1,6 @@
 <resources>
+    <item name="visible" type="id"/>
+    <item name="masked" type="id"/>
     <string name="app_name">Exo Control</string>
     <string name="action_scan">SCAN</string>
     <string name="action_stop">STOP</string>
