@@ -189,6 +189,14 @@ public class ExoControlActivity extends AppCompatActivity implements BluetoothSe
                 comex2.setStanceGain(Float.valueOf(s.toString()));
             }
         });
+        manualInput.addTextChangedListener(new ExoTextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                if(!(s.toString().isEmpty())) {
+                    comex2.setManualTorque(Float.valueOf(s.toString()));
+                }
+            }
+        });
 
         maxTorqueSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
