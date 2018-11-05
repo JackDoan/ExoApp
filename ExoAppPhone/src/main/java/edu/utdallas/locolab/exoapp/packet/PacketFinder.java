@@ -4,8 +4,6 @@ import android.util.Log;
 
 import com.github.douglasjunior.bluetoothclassiclibrary.BluetoothWriter;
 
-import org.jetbrains.annotations.Contract;
-
 import java.util.Arrays;
 import java.util.LinkedList;
 
@@ -91,7 +89,6 @@ public class PacketFinder {
         }
     }
 
-    @Contract(pure = true)
     private int findHeader(byte[] buffer) {
         int i = 0;
         int toReturn = -1;

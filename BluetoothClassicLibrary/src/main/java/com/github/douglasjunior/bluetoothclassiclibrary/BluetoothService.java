@@ -147,8 +147,6 @@ public abstract class BluetoothService {
 
     /**
      * Current BluetoothService status.
-     *
-     * @return
      */
     public synchronized BluetoothStatus getStatus() {
         return mStatus;

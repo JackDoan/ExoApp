@@ -46,9 +46,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
-import android.support.annotation.RequiresPermission;
 import android.util.Log;
-
+import android.support.annotation.RequiresPermission;
 import java.io.InputStream;
 import java.io.OutputStream;
 
